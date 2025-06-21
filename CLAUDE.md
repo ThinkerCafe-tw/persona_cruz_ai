@@ -58,21 +58,40 @@
 - **PORT**: 應用程式監聽的連接埠（Railway 會自動設定）
 - **FLASK_ENV**: Flask 環境（development/production）
 
+## Git 工作流程
+
+### 重要提醒
+- **此專案已經初始化並連結到 GitHub**
+- **絕對不要執行 `git init`**
+- **GitHub URL**: git@github.com:ThinkerCafe-tw/persona_cruz_ai.git
+
+### 正確的 Git 操作流程
+1. `git status` - 先檢查當前狀態
+2. `git add <files>` - 添加變更的檔案
+3. `git commit -m "message"` - 提交變更
+4. `git push origin main` - 推送到 GitHub（會自動觸發 Railway 部署）
+
+### 注意事項
+- Remote 已經設定好，不需要 `git remote add`
+- 專案已經在 main 分支，不需要切換分支
+- 推送後 Railway 會自動部署
+
 ## 專案結構
 
 ```
 persona_cruz_ai/
-├── .env                    # 環境變數（本地開發用）
 ├── .env.example           # 環境變數範例
 ├── .gitignore            # Git 忽略檔案
 ├── requirements.txt      # Python 套件清單
 ├── Procfile             # Railway 啟動指令
-├── railway.json         # Railway 配置檔
 ├── app.py               # Flask 主程式
 ├── config.py            # 設定檔
 ├── line_bot_handler.py  # Line Bot 處理邏輯
 ├── gemini_service.py    # Gemini API 整合
+├── calendar_service.py  # Google Calendar 整合
+├── startup_test.py      # 啟動自我檢測
 ├── jokes.py             # 笑話資料
+├── TEST_PLAN.md         # 測試計畫文件
 ├── README.md           # 專案說明
 └── CLAUDE.md           # 本文件
 ```
