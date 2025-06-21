@@ -1,7 +1,9 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+# 只在非 Railway 環境下載入 .env 檔案
+if os.getenv('RAILWAY_ENVIRONMENT') is None:
+    load_dotenv()
 
 class Config:
     # Line Bot 設定

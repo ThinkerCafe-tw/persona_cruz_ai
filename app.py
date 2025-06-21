@@ -1,9 +1,21 @@
 from flask import Flask, request, abort
+import os
+import logging
+import sys
+
+# 環境檢查（除錯用）
+print("=== Environment Check ===")
+print(f"RAILWAY_ENVIRONMENT: {os.getenv('RAILWAY_ENVIRONMENT')}")
+print(f"PORT: {os.getenv('PORT')}")
+print(f"LINE_CHANNEL_ACCESS_TOKEN exists: {bool(os.getenv('LINE_CHANNEL_ACCESS_TOKEN'))}")
+print(f"LINE_CHANNEL_SECRET exists: {bool(os.getenv('LINE_CHANNEL_SECRET'))}")
+print(f"GEMINI_API_KEY exists: {bool(os.getenv('GEMINI_API_KEY'))}")
+print(f"Total environment variables: {len(os.environ)}")
+print("========================")
+
 from config import Config
 from line_bot_handler import LineBotHandler
 from linebot.exceptions import InvalidSignatureError
-import logging
-import sys
 
 # 設定日誌
 logging.basicConfig(
