@@ -36,6 +36,8 @@ class LineBotHandler:
                 reply_text = self._get_help_message()
             elif user_message in ['說個笑話', '講個笑話', '來個笑話']:
                 reply_text = get_random_joke()
+            elif user_message.lower() == '/test':
+                reply_text = self._run_self_test()
             else:
                 # 取得 Gemini AI 回應
                 reply_text = self.gemini_service.get_response(user_id, user_message)
@@ -63,6 +65,43 @@ class LineBotHandler:
 • 說個笑話 - 聽個冷笑話放鬆一下
 
 有任何問題都可以直接問我喔！"""
+    
+    def _run_self_test(self):
+        """執行自我測試"""
+        test_results = []
+        
+        # 測試基本對話
+        try:
+            response = self.gemini_service.get_response("test_user", "你好")
+            test_results.append("✅ 基本對話: 通過" if response else "❌ 基本對話: 失敗")
+        except:
+            test_results.append("❌ 基本對話: 錯誤")
+        
+        # 測試笑話功能
+        try:
+            from jokes import get_random_joke
+            joke = get_random_joke()
+            test_results.append("✅ 笑話功能: 通過" if joke else "❌ 笑話功能: 失敗")
+        except:
+            test_results.append("❌ 笑話功能: 錯誤")
+        
+        # 測試日曆功能
+        try:
+            if self.gemini_service.calendar_service:
+                test_results.append("✅ 日曆服務: 已啟用")
+            else:
+                test_results.append("⚠️ 日曆服務: 未設定")
+        except:
+            test_results.append("❌ 日曆服務: 錯誤")
+        
+        # 建立測試報告
+        from datetime import datetime
+        report = "🧪 自我測試報告\n" + "="*20 + "\n"
+        report += "\n".join(test_results)
+        report += "\n" + "="*20 + "\n"
+        report += f"測試時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        
+        return report
     
     def handle_webhook(self, body, signature):
         """處理 webhook 請求"""

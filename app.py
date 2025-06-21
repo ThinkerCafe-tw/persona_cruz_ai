@@ -2,6 +2,23 @@ from flask import Flask, request, abort
 import os
 import logging
 import sys
+from startup_test import StartupTest
+
+# 設定基礎日誌（在 import 其他模組前）
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger(__name__)
+
+# 執行啟動自我檢測
+startup_tester = StartupTest()
+if not startup_tester.run_all_tests():
+    logger.error("啟動測試失敗！服務無法啟動。")
+    sys.exit(1)
+
+logger.info("所有啟動測試通過！繼續初始化服務...")
 
 # 環境檢查（生產環境）
 if os.getenv('RAILWAY_ENVIRONMENT'):
@@ -12,13 +29,7 @@ from config import Config
 from line_bot_handler import LineBotHandler
 from linebot.exceptions import InvalidSignatureError
 
-# 設定日誌
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler(sys.stdout)]
-)
-logger = logging.getLogger(__name__)
+# 日誌已在前面設定，這裡不需要重複設定
 
 # 驗證環境變數
 try:
@@ -83,7 +94,22 @@ def callback():
 @app.route("/health", methods=['GET'])
 def health_check():
     """健康檢查端點"""
-    return {"status": "healthy", "service": "Persona Cruz AI Bot"}
+    # 取得啟動測試狀態
+    startup_status = startup_tester.get_status()
+    
+    # 基本健康狀態
+    health_status = {
+        "status": "healthy" if startup_status["startup_test_passed"] else "unhealthy",
+        "service": "Persona Cruz AI Bot",
+        "startup_tests": startup_status,
+        "timestamp": startup_status["test_time"]
+    }
+    
+    # 如果有錯誤，返回 503 狀態碼
+    if not startup_status["startup_test_passed"]:
+        return health_status, 503
+    
+    return health_status
 
 @app.route("/test", methods=['GET', 'POST'])
 def test_endpoint():
