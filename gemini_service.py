@@ -135,7 +135,15 @@ class GeminiService:
             context = self._build_context(user_id, message)
             
             # 呼叫 Gemini API with Function Calling
+            logger.info(f"=== Calling Gemini API ===")
+            logger.info(f"User ID: {user_id}")
+            logger.info(f"Message: {message}")
+            logger.info(f"Context length: {len(context)} chars")
+            
             response = self.model.generate_content(context)
+            logger.info(f"✅ Gemini API response received")
+            logger.info(f"Response type: {type(response)}")
+            logger.info(f"Has candidates: {hasattr(response, 'candidates')}")
             
             # 檢查是否有 function call
             if hasattr(response, 'candidates') and response.candidates:
@@ -160,7 +168,9 @@ class GeminiService:
                             # 如果 function 回傳了訊息，直接使用
                             if function_response.get('message'):
                                 final_response = function_response['message']
-                                logger.info(f"Using function response message directly: {final_response[:100]}...")
+                                logger.info(f"✅ Using function response message directly")
+                                logger.info(f"Message length: {len(final_response)}")
+                                logger.info(f"Message preview: {final_response[:200]}...")
                             else:
                                 # 將 function 結果回傳給模型產生回應
                                 response = self.model.generate_content(messages)
@@ -196,6 +206,10 @@ class GeminiService:
             # 儲存對話歷史
             self._save_conversation(user_id, message, final_response)
             
+            logger.info(f"=== Returning final response ===")
+            logger.info(f"Response length: {len(final_response)}")
+            logger.info(f"Response preview: {final_response[:200]}...")
+            
             return final_response
             
         except Exception as e:
@@ -215,16 +229,22 @@ class GeminiService:
         function_name = function_call.name
         args = dict(function_call.args)
         
-        logger.info(f"Handling function call: {function_name} with args: {args}")
+        logger.info(f"=== Handling function call ===")
+        logger.info(f"Function name: {function_name}")
+        logger.info(f"Arguments: {args}")
         
+        result = None
         if function_name == "create_calendar_event":
-            return self._create_event_handler(args)
+            result = self._create_event_handler(args)
         elif function_name == "list_calendar_events":
-            return self._list_events_handler(args)
+            result = self._list_events_handler(args)
         elif function_name == "delete_calendar_event":
-            return self._delete_event_handler(args)
+            result = self._delete_event_handler(args)
         else:
-            return {"error": f"Unknown function: {function_name}"}
+            result = {"error": f"Unknown function: {function_name}"}
+            
+        logger.info(f"Function call result: {result}")
+        return result
     
     def _create_event_handler(self, args):
         """處理建立事件的請求"""
@@ -257,14 +277,18 @@ class GeminiService:
                 if result.get('link'):
                     message += f"🔗 連結：{result.get('link')}"
                 
-                logger.info(f"Calendar event created: {result}")
+                logger.info(f"✅ Calendar event created successfully")
+                logger.info(f"CalendarService result: {result}")
+                logger.info(f"Generated message: {message}")
                 
-                return {
+                return_value = {
                     "success": True,
                     "message": message,
                     "event_id": result.get('event_id'),
                     "link": result.get('link')
                 }
+                logger.info(f"Returning: {return_value}")
+                return return_value
             else:
                 error_msg = result.get('error', '未知錯誤')
                 logger.error(f"Failed to create calendar event: {error_msg}")

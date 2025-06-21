@@ -40,13 +40,32 @@ class LineBotHandler:
                 reply_text = self._run_self_test()
             else:
                 # 取得 Gemini AI 回應
+                logger.info(f"Getting Gemini response for message: {user_message[:50]}...")
                 reply_text = self.gemini_service.get_response(user_id, user_message)
+                logger.info(f"Gemini response received: {reply_text[:100]}...")
             
             # 回覆訊息
-            self.line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(text=reply_text)
-            )
+            try:
+                logger.info(f"=== Preparing to send Line reply ===")
+                logger.info(f"Reply token: {event.reply_token}")
+                logger.info(f"Reply text length: {len(reply_text)}")
+                logger.info(f"Reply text preview: {reply_text[:200]}...")
+                
+                # 建立訊息物件
+                text_message = TextSendMessage(text=reply_text)
+                logger.info(f"TextSendMessage created: {type(text_message)}")
+                
+                # 發送回覆
+                self.line_bot_api.reply_message(
+                    event.reply_token,
+                    text_message
+                )
+                logger.info("✅ Reply sent successfully to Line")
+            except Exception as e:
+                logger.error(f"❌ Failed to send Line reply: {str(e)}")
+                logger.error(f"Error type: {type(e).__name__}")
+                import traceback
+                logger.error(f"Traceback: {traceback.format_exc()}")
     
     def _get_help_message(self):
         """取得幫助訊息"""
