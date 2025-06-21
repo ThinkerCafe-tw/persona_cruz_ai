@@ -16,13 +16,26 @@ class GeminiService:
         tools = self._get_calendar_tools()
         
         # 使用支援 Function Calling 的模型
-        self.model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
-            tools=tools
-        )
+        try:
+            self.model = genai.GenerativeModel(
+                model_name='gemini-1.5-flash',
+                tools=tools
+            )
+            logger.info("Gemini model initialized with function calling")
+        except Exception as e:
+            logger.warning(f"Failed to initialize with function calling: {str(e)}")
+            # 降級到基本模型
+            self.model = genai.GenerativeModel('gemini-pro')
+            logger.info("Fallback to gemini-pro without function calling")
         
         self.conversation_history = {}
-        self.calendar_service = CalendarService()
+        
+        # 初始化 Calendar Service（如果有憑證的話）
+        try:
+            self.calendar_service = CalendarService()
+        except Exception as e:
+            logger.warning(f"Calendar service initialization failed: {str(e)}")
+            self.calendar_service = None
         
     def _get_calendar_tools(self):
         """定義日曆相關的工具函數"""
@@ -108,6 +121,9 @@ class GeminiService:
             AI 回應文字
         """
         try:
+            # 如果是簡單的日曆請求且 calendar_service 不可用，直接回應
+            if self.calendar_service is None and any(keyword in message for keyword in ['行程', '安排', '會議', '約會']):
+                return "抱歉，日曆功能目前無法使用。請確認日曆服務已正確設定。"
             # 初始化使用者對話歷史
             if user_id not in self.conversation_history:
                 self.conversation_history[user_id] = []
@@ -121,9 +137,10 @@ class GeminiService:
             # 檢查是否有 function call
             if hasattr(response, 'candidates') and response.candidates:
                 candidate = response.candidates[0]
-                if hasattr(candidate.content, 'parts'):
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts') and candidate.content.parts:
                     for part in candidate.content.parts:
-                        if hasattr(part, 'function_call'):
+                        if hasattr(part, 'function_call') and part.function_call:
+                            logger.info(f"Function call detected: {part.function_call.name}")
                             # 處理 function call
                             function_response = self._handle_function_call(part.function_call)
                             
@@ -142,7 +159,17 @@ class GeminiService:
                             ])
             
             # 取得最終回應
-            final_response = response.text
+            if hasattr(response, 'text'):
+                final_response = response.text
+            else:
+                # 嘗試從 candidates 取得文字
+                try:
+                    if response.candidates and response.candidates[0].content.parts:
+                        final_response = response.candidates[0].content.parts[0].text
+                    else:
+                        final_response = "抱歉，我無法處理這個請求。"
+                except:
+                    final_response = "抱歉，我遇到了一些問題。"
             
             # 儲存對話歷史
             self._save_conversation(user_id, message, final_response)
@@ -151,7 +178,15 @@ class GeminiService:
             
         except Exception as e:
             logger.error(f"Gemini API error: {str(e)}")
-            return "抱歉，我現在無法回應您的訊息。請稍後再試。"
+            logger.error(f"Error type: {type(e).__name__}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            
+            # 如果是日曆相關錯誤，提供更具體的訊息
+            if "calendar" in str(e).lower():
+                return "抱歉，我在處理日曆功能時遇到問題。請確認您已經分享日曆給我。"
+            else:
+                return "抱歉，我現在無法回應您的訊息。請稍後再試。"
     
     def _handle_function_call(self, function_call):
         """處理 function call"""
