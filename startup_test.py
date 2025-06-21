@@ -16,12 +16,19 @@ class TestAgent:
     我是一位負責任，且充滿好奇充滿積極性正面的上進資深測試專員。
     我會仔細觀察測試過程的 Log 和 Exception，分析錯誤堆疊，
     並從中學習和反思，為未來的測試留下有價值的洞察。
+    
+    擁有權限：
+    - 讀取整個專案的所有原始碼
+    - 分析程式碼結構和依賴關係
+    - 追蹤錯誤的根源
+    - 提供改進建議
     """
     
     def __init__(self):
         self.memory_file = "/tmp/test_memory.json"
         self.memory = self._load_memory()
         self.personality = "🧪 資深測試專員"
+        self.project_root = os.path.dirname(os.path.abspath(__file__))  # 專案根目錄
     
     def _load_memory(self):
         """載入測試記憶"""
@@ -35,7 +42,8 @@ class TestAgent:
             "test_history": [],
             "patterns": {},
             "reflections": [],  # 反思記錄
-            "wisdom": []  # 累積的智慧
+            "wisdom": [],  # 累積的智慧
+            "code_analysis": []  # 程式碼分析記錄
         }
     
     def remember_test(self, test_name, success, duration, error=None):
@@ -56,6 +64,15 @@ class TestAgent:
         # 進行反思
         self._reflect_on_test(test_name, success, duration, error)
         
+        # 如果有錯誤，進行程式碼分析
+        if error and not success:
+            analysis = self.analyze_error_context(error, test_name)
+            if analysis.get("code_context"):
+                self.memory["code_analysis"].append(analysis)
+                # 只保留最近 20 個分析
+                if len(self.memory["code_analysis"]) > 20:
+                    self.memory["code_analysis"] = self.memory["code_analysis"][-20:]
+        
         self._save_memory()
     
     def _reflect_on_test(self, test_name, success, duration, error):
@@ -74,6 +91,9 @@ class TestAgent:
             if "TypeError" in str(error):
                 reflection["insight"] = "發現 TypeError！這通常意味著資料類型不匹配。要特別注意 API 回應的結構。"
                 reflection["advice"] = "下次測試前先驗證資料類型，特別是 Content 物件的處理。"
+                # 2024-06-21 更新：已修復 Content 物件混合問題，改用 dict 格式傳遞訊息
+                if "Content" in str(error) and "Blob" in str(error):
+                    reflection["fix_applied"] = "已修復：使用 dict 格式而非混合 Content 物件"
             elif "function_call" in str(error).lower():
                 reflection["insight"] = "Function Calling 相關錯誤！這是系統的核心功能，需要特別關注。"
                 reflection["advice"] = "建議增加 Function Calling 的 mock 測試，確保各種情境都能處理。"
@@ -94,6 +114,39 @@ class TestAgent:
         # 累積智慧
         if len(self.memory["test_history"]) % 10 == 0:  # 每 10 次測試總結一次
             self._accumulate_wisdom()
+    
+    def read_source_file(self, filename):
+        """讀取專案原始碼檔案"""
+        try:
+            filepath = os.path.join(self.project_root, filename)
+            if os.path.exists(filepath):
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    return f.read()
+        except Exception as e:
+            logger.warning(f"測試專員無法讀取檔案 {filename}: {str(e)}")
+        return None
+    
+    def analyze_error_context(self, error, test_name):
+        """深入分析錯誤的上下文"""
+        analysis = {
+            "error_type": type(error).__name__ if error else "Unknown",
+            "test_name": test_name,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # 如果是 Function Calling 相關錯誤，讀取 gemini_service.py
+        if error and ("function" in str(error).lower() or "Content" in str(error)):
+            source = self.read_source_file("gemini_service.py")
+            if source:
+                # 尋找相關程式碼段落
+                lines = source.split('\n')
+                for i, line in enumerate(lines):
+                    if "generate_content" in line and i > 5:
+                        analysis["code_context"] = "\n".join(lines[i-5:i+5])
+                        analysis["line_number"] = i + 1
+                        break
+        
+        return analysis
     
     def _accumulate_wisdom(self):
         """累積測試智慧"""
@@ -117,6 +170,10 @@ class TestAgent:
             most_common = max(error_types.items(), key=lambda x: x[1])
             wisdom["pattern"] = f"最常見的錯誤類型是 {most_common[0]}（出現 {most_common[1]} 次）"
             wisdom["recommendation"] = "建議針對這個錯誤類型加強防禦性編程。"
+            
+            # 如果有程式碼分析記錄，加入智慧中
+            if "code_analysis" in self.memory:
+                wisdom["code_insights"] = f"已分析 {len(self.memory.get('code_analysis', []))} 個程式碼片段"
         
         self.memory["wisdom"].append(wisdom)
         
@@ -394,6 +451,12 @@ class StartupTest:
             except Exception as e:
                 self.results[test_name] = "❌ 失敗"
                 self.critical_failures.append(f"Function Calling 執行錯誤: {str(e)}")
+                
+                # 測試專員進行深入分析
+                error_analysis = self.test_agent.analyze_error_context(e, test_name)
+                if error_analysis.get("code_context"):
+                    logger.info(f"測試專員發現錯誤相關程式碼在第 {error_analysis.get('line_number')} 行")
+                
                 self.test_agent.remember_test(test_name, False, time.time() - start_time, e)
                 
         except ImportError as e:

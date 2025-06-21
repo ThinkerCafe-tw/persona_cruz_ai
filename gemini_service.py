@@ -144,18 +144,18 @@ class GeminiService:
                             # 處理 function call
                             function_response = self._handle_function_call(part.function_call)
                             
+                            # 建立包含 function response 的新訊息
+                            messages = [
+                                {"role": "user", "parts": [{"text": message}]},
+                                {"role": "model", "parts": [{"function_call": {"name": part.function_call.name, "args": dict(part.function_call.args)}}]},
+                                {"role": "function", "parts": [{"function_response": {
+                                    "name": part.function_call.name,
+                                    "response": {"result": function_response}
+                                }}]}
+                            ]
+                            
                             # 將 function 結果回傳給模型
-                            response = self.model.generate_content([
-                                context,
-                                genai.protos.Content(
-                                    parts=[genai.protos.Part(
-                                        function_response=genai.protos.FunctionResponse(
-                                            name=part.function_call.name,
-                                            response={"result": function_response}
-                                        )
-                                    )]
-                                )
-                            ])
+                            response = self.model.generate_content(messages)
             
             # 取得最終回應
             if hasattr(response, 'text'):
