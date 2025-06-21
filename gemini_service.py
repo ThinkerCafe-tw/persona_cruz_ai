@@ -121,6 +121,9 @@ class GeminiService:
             AI 回應文字
         """
         try:
+            # 初始化 final_response
+            final_response = None
+            
             # 如果是簡單的日曆請求且 calendar_service 不可用，直接回應
             if self.calendar_service is None and any(keyword in message for keyword in ['行程', '安排', '會議', '約會']):
                 return "抱歉，日曆功能目前無法使用。請確認日曆服務已正確設定。"
@@ -174,6 +177,13 @@ class GeminiService:
                                             final_response = "抱歉，我無法處理這個請求。"
                                     except:
                                         final_response = "抱歉，我遇到了一些問題。"
+            
+            # 如果不是 function call，取得一般回應
+            if final_response is None:
+                if hasattr(response, 'text'):
+                    final_response = response.text
+                else:
+                    final_response = "抱歉，我無法理解您的訊息。"
             
             # 儲存對話歷史
             self._save_conversation(user_id, message, final_response)

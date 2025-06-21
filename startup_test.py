@@ -234,9 +234,12 @@ class TestAgent:
     def get_insights(self):
         """取得測試洞察 - 展現測試專員的個性"""
         # 檢查是否在 Railway 環境
-        if self.is_railway and self.memory.get("git_commits"):
-            latest_commit = self.memory["git_commits"][0]["message"]
-            return f"{self.personality} 報告：Railway 新部署！最新 commit: {latest_commit[:50]}... 讓我看看這次更新了什麼！"
+        if self.is_railway:
+            if self.memory.get("git_commits") and len(self.memory["git_commits"]) > 0:
+                latest_commit = self.memory["git_commits"][0]["message"]
+                return f"{self.personality} 報告：Railway 新部署！最新 commit: {latest_commit[:50]}... 讓我看看這次更新了什麼！"
+            else:
+                return f"{self.personality} 報告：Railway 新部署！正在初始化測試環境... 🚀"
         
         if not self.memory["test_history"]:
             return f"{self.personality} 報告：這是我第一次執行測試！充滿期待和好奇心！🚀"
