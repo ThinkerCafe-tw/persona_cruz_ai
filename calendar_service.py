@@ -16,7 +16,8 @@ class CalendarService:
     def __init__(self):
         """初始化 Google Calendar 服務"""
         self.service = None
-        self.calendar_id = 'primary'
+        # 服務帳戶需要使用具體的日曆 ID，而非 'primary'
+        self.calendar_id = os.getenv('GOOGLE_CALENDAR_ID', 'primary')
         self._initialize_service()
     
     def _initialize_service(self):
@@ -94,10 +95,14 @@ class CalendarService:
             if location:
                 event['location'] = location
             
+            logger.info(f"Creating calendar event: {summary} at {start_time}")
+            
             event = self.service.events().insert(
                 calendarId=self.calendar_id, 
                 body=event
             ).execute()
+            
+            logger.info(f"Calendar event created successfully: {event.get('id')}")
             
             return {
                 "success": True, 
@@ -106,8 +111,18 @@ class CalendarService:
             }
             
         except HttpError as error:
-            logger.error(f'An error occurred: {error}')
-            return {"error": str(error)}
+            logger.error(f'HTTP error creating calendar event: {error}')
+            error_details = str(error)
+            
+            # 特別處理常見錯誤
+            if "calendar not found" in error_details.lower():
+                return {"error": "找不到日曆。請確認已與服務帳戶分享日曆。"}
+            elif "insufficient permissions" in error_details.lower():
+                return {"error": "權限不足。請確認服務帳戶有寫入權限。"}
+            elif "invalid time" in error_details.lower():
+                return {"error": "時間格式錯誤。"}
+            else:
+                return {"error": f"Google Calendar 錯誤：{error_details}"}
     
     def delete_event(self, event_id):
         """刪除行程"""

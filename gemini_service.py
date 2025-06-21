@@ -154,21 +154,26 @@ class GeminiService:
                                 }}]}
                             ]
                             
-                            # 將 function 結果回傳給模型
-                            response = self.model.generate_content(messages)
-            
-            # 取得最終回應
-            if hasattr(response, 'text'):
-                final_response = response.text
-            else:
-                # 嘗試從 candidates 取得文字
-                try:
-                    if response.candidates and response.candidates[0].content.parts:
-                        final_response = response.candidates[0].content.parts[0].text
-                    else:
-                        final_response = "抱歉，我無法處理這個請求。"
-                except:
-                    final_response = "抱歉，我遇到了一些問題。"
+                            # 如果 function 回傳了訊息，直接使用
+                            if function_response.get('message'):
+                                final_response = function_response['message']
+                                logger.info(f"Using function response message directly: {final_response[:100]}...")
+                            else:
+                                # 將 function 結果回傳給模型產生回應
+                                response = self.model.generate_content(messages)
+                                
+                                # 取得最終回應
+                                if hasattr(response, 'text'):
+                                    final_response = response.text
+                                else:
+                                    # 嘗試從 candidates 取得文字
+                                    try:
+                                        if response.candidates and response.candidates[0].content.parts:
+                                            final_response = response.candidates[0].content.parts[0].text
+                                        else:
+                                            final_response = "抱歉，我無法處理這個請求。"
+                                    except:
+                                        final_response = "抱歉，我遇到了一些問題。"
             
             # 儲存對話歷史
             self._save_conversation(user_id, message, final_response)
@@ -226,17 +231,30 @@ class GeminiService:
             )
             
             if result.get('success'):
+                message = f"✅ 已成功建立行程「{args.get('summary')}」\n"
+                message += f"📅 時間：{date_str} {time_str}\n"
+                message += f"⏱️ 長度：{duration} 小時\n"
+                if args.get('location'):
+                    message += f"📍 地點：{args.get('location')}\n"
+                if result.get('link'):
+                    message += f"🔗 連結：{result.get('link')}"
+                
+                logger.info(f"Calendar event created: {result}")
+                
                 return {
                     "success": True,
-                    "message": f"已成功建立行程「{args.get('summary')}」",
+                    "message": message,
                     "event_id": result.get('event_id'),
                     "link": result.get('link')
                 }
             else:
+                error_msg = result.get('error', '未知錯誤')
+                logger.error(f"Failed to create calendar event: {error_msg}")
+                
                 return {
                     "success": False,
-                    "message": "建立行程失敗",
-                    "error": result.get('error')
+                    "message": f"❌ 建立行程失敗：{error_msg}",
+                    "error": error_msg
                 }
                 
         except Exception as e:
