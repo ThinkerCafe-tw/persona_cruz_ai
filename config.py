@@ -15,6 +15,9 @@ class Config:
     PORT = int(os.getenv('PORT', 5000))
     DEBUG = os.getenv('FLASK_ENV') == 'development'
     
+    # 判斷是否在 Railway 環境
+    IS_RAILWAY = os.getenv('RAILWAY_ENVIRONMENT') is not None
+    
     # Gemini 模型設定
     GEMINI_MODEL = 'gemini-pro'
     

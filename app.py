@@ -87,4 +87,7 @@ def test_endpoint():
 if __name__ == "__main__":
     port = Config.PORT
     logger.info(f"Starting Line Bot on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=Config.DEBUG)
+    
+    # 在 Railway 環境下，由 gunicorn 處理，不直接運行
+    if not Config.IS_RAILWAY:
+        app.run(host='0.0.0.0', port=port, debug=Config.DEBUG)
