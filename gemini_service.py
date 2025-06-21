@@ -177,6 +177,9 @@ class GeminiService:
                                             final_response = "抱歉，我無法處理這個請求。"
                                     except:
                                         final_response = "抱歉，我遇到了一些問題。"
+                            
+                            # 找到 function call 後就跳出迴圈
+                            break
             
             # 如果不是 function call，取得一般回應
             if final_response is None:
@@ -184,6 +187,11 @@ class GeminiService:
                     final_response = response.text
                 else:
                     final_response = "抱歉，我無法理解您的訊息。"
+            
+            # 確保 final_response 不是 None
+            if final_response is None:
+                final_response = "抱歉，我無法處理您的請求。"
+                logger.warning("final_response was None, using default message")
             
             # 儲存對話歷史
             self._save_conversation(user_id, message, final_response)

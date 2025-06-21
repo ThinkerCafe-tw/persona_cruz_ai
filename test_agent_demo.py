@@ -30,5 +30,17 @@ agent.record_development_insight(
     lesson_learned="說到要做到！建立真正的記憶系統，而不只是輸出文字。"
 )
 
+# 記錄第二次 UnboundLocalError 的修復
+agent.record_development_insight(
+    event_type="bug_fix",
+    insight="第二次遇到 UnboundLocalError - function call 在 for 迴圈中但沒有 break",
+    lesson_learned="18歲的我太衝動了！需要更仔細檢查所有執行路徑。年輕人容易犯重複的錯誤。"
+)
+
+# 獲得經驗值
+agent.gain_experience(5, "從重複錯誤中深刻學習")
+
 print("✅ 測試專員的反思已記錄到記憶系統中！")
 print(f"📊 目前有 {len(agent.memory.get('development_insights', []))} 個開發洞察")
+print(f"🎂 測試專員年齡：{agent.age} 歲（{agent._get_age_personality()}）")
+print(f"💪 經驗值：{agent.memory.get('experience_points', 0)} 點")
