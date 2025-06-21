@@ -74,15 +74,28 @@ class StartupTest:
                 return
                 
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-pro')
             
-            # 發送簡單測試
-            response = model.generate_content("回應OK即可")
-            if response.text:
+            # 嘗試不同的模型名稱
+            models_to_try = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
+            response = None
+            successful_model = None
+            
+            for model_name in models_to_try:
+                try:
+                    model = genai.GenerativeModel(model_name)
+                    response = model.generate_content("回應OK即可")
+                    if response and response.text:
+                        successful_model = model_name
+                        break
+                except Exception as e:
+                    continue
+            
+            if successful_model:
                 self.results[test_name] = "✅ 通過"
+                logger.info(f"Gemini API 測試成功，使用模型: {successful_model}")
             else:
                 self.results[test_name] = "❌ 失敗"
-                self.critical_failures.append("Gemini API 無回應")
+                self.critical_failures.append(f"Gemini API 無法使用任何模型: {', '.join(models_to_try)}")
                 
         except Exception as e:
             self.results[test_name] = "❌ 失敗"

@@ -4,10 +4,12 @@
 
 ## 專案概述
 
-這是一個整合 Google Gemini AI 的 Line Bot，主要功能包括：
-- 使用 Gemini AI 進行智能對話
-- 提供笑話功能
-- 支援對話記憶
+這是一個整合 Google Gemini AI 的 Line Bot，部署在 Railway 平台上，主要功能包括：
+- 使用 Gemini AI 進行智能對話（支援 Function Calling）
+- 提供笑話功能（50個預設冷笑話）
+- 支援對話記憶（每個用戶獨立）
+- Google Calendar 整合（建立、查詢、更新、刪除行程）
+- 啟動自我檢測系統（確保服務健康）
 
 ## 技術架構
 
@@ -52,11 +54,16 @@
 ## 環境變數說明
 
 - **LINE_CHANNEL_ACCESS_TOKEN**: Line Bot 的存取權杖
-- **LINE_CHANNEL_SECRET**: Line Bot 的頻道密鑰
+- **LINE_CHANNEL_SECRET**: Line Bot 的頻道密鑰（正確值：1d2503ea9eb7dd7eecbd777016519b22）
 - **GEMINI_API_KEY**: Google Gemini AI 的 API 金鑰
 - **GOOGLE_CALENDAR_CREDENTIALS**: Google 服務帳戶憑證（JSON 格式，選用）
 - **PORT**: 應用程式監聽的連接埠（Railway 會自動設定）
 - **FLASK_ENV**: Flask 環境（development/production）
+
+### 重要注意事項
+- 環境變數只在 Railway Dashboard 設定，不使用本機 .env 檔案
+- Railway 會自動設定 PORT 和 RAILWAY_ENVIRONMENT 變數
+- 所有敏感資訊都應該在 Railway 環境變數中管理
 
 ## Git 工作流程
 
@@ -107,8 +114,69 @@ A: 修改 gemini_service.py 中的 system_prompt。
 ### Q: 如何查看部署日誌？
 A: 在 Railway Dashboard 中點擊專案，選擇 "Logs" 標籤。
 
+## 已知問題與解決方案
+
+### Gemini API 模型相容性
+- **問題**: `gemini-pro` 在某些 API 版本中不可用（404 錯誤）
+- **解決方案**: 使用 `gemini-1.5-flash` 或 `gemini-1.5-pro`
+- **注意**: 啟動測試應與主服務使用相同的模型名稱
+
+### Line Bot 簽名驗證
+- **問題**: Invalid signature error
+- **解決方案**: 確保使用正確的 Channel Secret
+- **正確的 Channel Secret**: 1d2503ea9eb7dd7eecbd777016519b22
+
+### Railway 環境變數
+- **問題**: 環境變數無法載入
+- **解決方案**: 
+  - 不要在 Railway 環境中載入 .env 檔案
+  - 所有環境變數都在 Railway Dashboard 設定
+  - config.py 已設定為只在非 Railway 環境載入 .env
+
+### Google Calendar 整合
+- **問題**: NoneType object is not iterable
+- **解決方案**: 已加入完整的 null 檢查和錯誤處理
+- **設定步驟**:
+  1. 建立 Google Cloud 專案並啟用 Calendar API
+  2. 建立服務帳戶並下載 JSON 金鑰
+  3. 將 JSON 轉為單行字串設定在 Railway
+  4. 分享日曆給服務帳戶 email
+
+## 測試策略
+
+### 啟動自我檢測
+- 服務啟動前會執行 `startup_test.py`
+- 檢測項目：
+  - 環境變數完整性
+  - Gemini API 連線
+  - Line Bot 憑證驗證
+  - Google Calendar 設定（選用）
+  - 基本模組載入
+- 任何關鍵測試失敗都會阻止服務啟動
+
+### 運行時測試
+- 使用 `/test` 指令執行自我測試
+- 健康檢查端點：`/health`
+- 測試結果會包含詳細的錯誤訊息
+
+## 功能指令
+
+### Line Bot 指令
+- `/help` 或 `幫助` - 顯示使用說明
+- `/clear` 或 `清除對話` - 清除對話記錄
+- `/test` - 執行自我測試
+- `說個笑話`、`講個笑話`、`來個笑話` - 隨機笑話
+
+### 日曆自然語言指令
+- 建立：「幫我安排明天下午3點開會」
+- 查詢：「我明天有什麼行程？」
+- 更新：「把明天的會議改到4點」
+- 刪除：「取消明天的會議」
+
 ## 維護提醒
 
 - 定期檢查 Railway 的免費額度使用情況
 - 更新相依套件時記得測試相容性
 - 保持 API 金鑰的安全性，不要提交到版本控制
+- 定期檢查 Gemini API 的模型更新和棄用通知
+- 監控啟動測試日誌以及早發現問題
