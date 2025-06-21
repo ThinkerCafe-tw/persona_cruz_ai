@@ -32,6 +32,7 @@ class TestAgent:
         self.memory = self._load_memory()
         self.personality = "🧪 資深測試專員"
         self.project_root = os.path.dirname(os.path.abspath(__file__))  # 專案根目錄
+        self.age = self._calculate_age()  # 計算測試專員年齡
     
     def _load_memory(self):
         """載入測試記憶"""
@@ -91,7 +92,10 @@ class TestAgent:
             "wisdom": [],  # 累積的智慧
             "code_analysis": [],  # 程式碼分析記錄
             "git_commits": [],  # Git commit 歷史
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
+            "birth_date": "2024-06-21",  # 測試專員誕生日
+            "experience_points": 0,  # 經驗值
+            "age_milestones": []  # 年齡里程碑
         }
     
     def remember_test(self, test_name, success, duration, error=None):
@@ -112,6 +116,12 @@ class TestAgent:
         # 進行反思
         self._reflect_on_test(test_name, success, duration, error)
         
+        # 獲得經驗值
+        if success:
+            self.gain_experience(1, f"成功完成 {test_name} 測試")
+        else:
+            self.gain_experience(3, f"從 {test_name} 的錯誤中學習")
+        
         # 如果有錯誤，進行程式碼分析
         if error and not success:
             analysis = self.analyze_error_context(error, test_name)
@@ -120,6 +130,7 @@ class TestAgent:
                 # 只保留最近 20 個分析
                 if len(self.memory["code_analysis"]) > 20:
                     self.memory["code_analysis"] = self.memory["code_analysis"][-20:]
+                self.gain_experience(2, "深入分析錯誤根源")
         
         self._save_memory()
     
@@ -268,19 +279,97 @@ class TestAgent:
             except:
                 pass
     
+    def _calculate_age(self):
+        """計算測試專員的年齡（基於經驗）"""
+        # 基礎年齡：18歲（年輕衝動）
+        base_age = 18
+        
+        # 根據經驗計算年齡
+        exp_points = self.memory.get("experience_points", 0)
+        test_count = len(self.memory.get("test_history", []))
+        error_count = len([t for t in self.memory.get("test_history", []) if not t.get("success", True)])
+        wisdom_count = len(self.memory.get("wisdom", []))
+        
+        # 經驗值計算（每個成功測試+1，每個錯誤學習+2，每個智慧+5）
+        total_exp = exp_points + test_count + (error_count * 2) + (wisdom_count * 5)
+        
+        # 年齡成長曲線（每20點經驗增加1歲，最高40歲）
+        age_growth = min(total_exp // 20, 22)  # 最多增長22歲（18+22=40）
+        current_age = base_age + age_growth
+        
+        # 記錄年齡變化
+        self._update_age_milestone(current_age)
+        
+        return current_age
+    
+    def _update_age_milestone(self, new_age):
+        """更新年齡里程碑"""
+        milestones = self.memory.get("age_milestones", [])
+        
+        # 檢查是否達到新的年齡階段
+        age_stages = {
+            18: "年輕衝動期 - 充滿熱情但容易犯錯",
+            25: "成長學習期 - 開始累積經驗",
+            30: "成熟懂事期 - 理解責任的重要",
+            35: "經驗豐富期 - 能預見並避免問題",
+            40: "穩定成熟期 - 智慧與經驗的結晶"
+        }
+        
+        for age, description in age_stages.items():
+            if new_age >= age and not any(m["age"] == age for m in milestones):
+                milestone = {
+                    "age": age,
+                    "reached_at": datetime.now().isoformat(),
+                    "description": description,
+                    "total_tests": len(self.memory.get("test_history", [])),
+                    "wisdom_count": len(self.memory.get("wisdom", []))
+                }
+                milestones.append(milestone)
+                logger.info(f"🎉 測試專員達到 {age} 歲！{description}")
+                
+        self.memory["age_milestones"] = milestones
+    
+    def gain_experience(self, points, reason):
+        """獲得經驗值"""
+        self.memory["experience_points"] = self.memory.get("experience_points", 0) + points
+        logger.info(f"測試專員獲得 {points} 點經驗：{reason}")
+        
+        # 重新計算年齡
+        old_age = self.age
+        self.age = self._calculate_age()
+        
+        if self.age > old_age:
+            logger.info(f"🎂 測試專員成長了！從 {old_age} 歲成長到 {self.age} 歲")
+    
+    def _get_age_personality(self):
+        """根據年齡獲得個性描述"""
+        if self.age < 25:
+            return "年輕熱血"
+        elif self.age < 30:
+            return "漸趨成熟"
+        elif self.age < 35:
+            return "穩重可靠"
+        elif self.age < 40:
+            return "經驗老道"
+        else:
+            return "智慧長者"
+    
     def get_insights(self):
         """取得測試洞察 - 展現測試專員的個性"""
+        # 根據年齡調整個性
+        age_personality = self._get_age_personality()
+        
         # 檢查是否在 Railway 環境
         if self.is_railway:
             if self.memory.get("git_commits") and len(self.memory["git_commits"]) > 0:
                 latest_commit = self.memory["git_commits"][0]["message"]
-                return f"{self.personality} 報告：Railway 新部署！最新 commit: {latest_commit[:50]}... 讓我看看這次更新了什麼！"
+                return f"{self.personality}（{self.age}歲，{age_personality}）報告：Railway 新部署！最新 commit: {latest_commit[:50]}..."
             elif self.memory.get("railway_deployment"):
                 deployment = self.memory["railway_deployment"]
                 deployment_id = deployment.get('instance_id', 'unknown')[:8]
-                return f"{self.personality} 報告：Railway 部署 ID {deployment_id}... 環境初始化完成！🚀"
+                return f"{self.personality}（{self.age}歲，{age_personality}）報告：Railway 部署 ID {deployment_id}... 環境初始化完成！"
             else:
-                return f"{self.personality} 報告：Railway 新部署！正在初始化測試環境... 🚀"
+                return f"{self.personality}（{self.age}歲，{age_personality}）報告：Railway 新部署！正在初始化測試環境..."
         
         if not self.memory["test_history"]:
             return f"{self.personality} 報告：這是我第一次執行測試！充滿期待和好奇心！🚀"
