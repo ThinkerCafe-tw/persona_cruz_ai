@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
 
-# 只在非 Railway 環境下載入 .env 檔案
-if os.getenv('RAILWAY_ENVIRONMENT') is None:
+# Railway 環境不需要 .env 檔案
+if not os.getenv('RAILWAY_ENVIRONMENT'):
     load_dotenv()
 
 class Config:

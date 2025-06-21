@@ -3,15 +3,10 @@ import os
 import logging
 import sys
 
-# 環境檢查（除錯用）
-print("=== Environment Check ===")
-print(f"RAILWAY_ENVIRONMENT: {os.getenv('RAILWAY_ENVIRONMENT')}")
-print(f"PORT: {os.getenv('PORT')}")
-print(f"LINE_CHANNEL_ACCESS_TOKEN exists: {bool(os.getenv('LINE_CHANNEL_ACCESS_TOKEN'))}")
-print(f"LINE_CHANNEL_SECRET exists: {bool(os.getenv('LINE_CHANNEL_SECRET'))}")
-print(f"GEMINI_API_KEY exists: {bool(os.getenv('GEMINI_API_KEY'))}")
-print(f"Total environment variables: {len(os.environ)}")
-print("========================")
+# 環境檢查（生產環境）
+if os.getenv('RAILWAY_ENVIRONMENT'):
+    logger.info(f"Running in Railway environment")
+    logger.info(f"Environment variables loaded: {len(os.environ)}")
 
 from config import Config
 from line_bot_handler import LineBotHandler
@@ -100,6 +95,7 @@ if __name__ == "__main__":
     port = Config.PORT
     logger.info(f"Starting Line Bot on port {port}")
     
-    # 在 Railway 環境下，由 gunicorn 處理，不直接運行
+    # Railway 使用 gunicorn，本機開發才用 Flask 內建伺服器
     if not Config.IS_RAILWAY:
+        logger.warning("Running in development mode - not for production use!")
         app.run(host='0.0.0.0', port=port, debug=Config.DEBUG)

@@ -16,26 +16,17 @@
 - **AI 服務**: Google Gemini AI (google-generativeai 0.3.2)
 - **部署平台**: Railway
 
-## 本地開發流程
+## 開發流程
 
-1. 安裝相依套件：
-   ```bash
-   pip install -r requirements.txt
-   ```
+此專案已完全雲端化，所有開發和部署都在 Railway 上進行。
 
-2. 設定環境變數（複製 .env.example 到 .env）
+### 更新程式碼
+1. 修改程式碼
+2. 提交到 GitHub
+3. Railway 自動部署
 
-3. 啟動應用程式：
-   ```bash
-   python app.py
-   ```
-
-4. 使用 Ngrok 建立公開 URL：
-   ```bash
-   ngrok http 8080
-   ```
-
-5. 在 Line Developers Console 設定 Webhook URL
+### 環境變數管理
+所有環境變數都在 Railway Dashboard 設定，不使用本機 .env 檔案。
 
 ## Railway 部署流程
 
