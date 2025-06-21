@@ -63,6 +63,7 @@
 - **LINE_CHANNEL_ACCESS_TOKEN**: Line Bot 的存取權杖
 - **LINE_CHANNEL_SECRET**: Line Bot 的頻道密鑰
 - **GEMINI_API_KEY**: Google Gemini AI 的 API 金鑰
+- **GOOGLE_CALENDAR_CREDENTIALS**: Google 服務帳戶憑證（JSON 格式，選用）
 - **PORT**: 應用程式監聽的連接埠（Railway 會自動設定）
 - **FLASK_ENV**: Flask 環境（development/production）
 

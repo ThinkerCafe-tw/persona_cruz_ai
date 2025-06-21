@@ -1,6 +1,9 @@
 import google.generativeai as genai
 from config import Config
 import logging
+import json
+from datetime import datetime, timedelta
+from calendar_service import CalendarService
 
 logger = logging.getLogger(__name__)
 
@@ -8,8 +11,90 @@ class GeminiService:
     def __init__(self):
         """初始化 Gemini 服務"""
         genai.configure(api_key=Config.GEMINI_API_KEY)
-        self.model = genai.GenerativeModel(Config.GEMINI_MODEL)
+        
+        # 定義 Function Calling 工具
+        tools = self._get_calendar_tools()
+        
+        # 使用支援 Function Calling 的模型
+        self.model = genai.GenerativeModel(
+            model_name='gemini-1.5-flash',
+            tools=tools
+        )
+        
         self.conversation_history = {}
+        self.calendar_service = CalendarService()
+        
+    def _get_calendar_tools(self):
+        """定義日曆相關的工具函數"""
+        return [{
+            "function_declarations": [
+                {
+                    "name": "create_calendar_event",
+                    "description": "在 Google Calendar 建立新的行程或事件",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {
+                                "type": "string",
+                                "description": "事件標題或名稱"
+                            },
+                            "date": {
+                                "type": "string",
+                                "description": "日期，格式：YYYY-MM-DD"
+                            },
+                            "time": {
+                                "type": "string",
+                                "description": "時間，格式：HH:MM"
+                            },
+                            "duration_hours": {
+                                "type": "number",
+                                "description": "活動持續時間（小時）"
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "事件描述或備註"
+                            },
+                            "location": {
+                                "type": "string",
+                                "description": "地點"
+                            }
+                        },
+                        "required": ["summary", "date", "time"]
+                    }
+                },
+                {
+                    "name": "list_calendar_events",
+                    "description": "查詢 Google Calendar 的行程",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "date": {
+                                "type": "string",
+                                "description": "要查詢的日期，格式：YYYY-MM-DD，如果是今天可以用 'today'，明天用 'tomorrow'"
+                            },
+                            "days_ahead": {
+                                "type": "integer",
+                                "description": "查詢未來幾天的行程"
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "delete_calendar_event",
+                    "description": "刪除 Google Calendar 的行程",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "event_id": {
+                                "type": "string",
+                                "description": "要刪除的事件 ID"
+                            }
+                        },
+                        "required": ["event_id"]
+                    }
+                }
+            ]
+        }]
         
     def get_response(self, user_id: str, message: str) -> str:
         """
@@ -30,24 +115,203 @@ class GeminiService:
             # 建立對話上下文
             context = self._build_context(user_id, message)
             
-            # 呼叫 Gemini API
+            # 呼叫 Gemini API with Function Calling
             response = self.model.generate_content(context)
             
-            # 儲存對話歷史
-            self._save_conversation(user_id, message, response.text)
+            # 檢查是否有 function call
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate.content, 'parts'):
+                    for part in candidate.content.parts:
+                        if hasattr(part, 'function_call'):
+                            # 處理 function call
+                            function_response = self._handle_function_call(part.function_call)
+                            
+                            # 將 function 結果回傳給模型
+                            response = self.model.generate_content([
+                                context,
+                                response.candidates[0].content,
+                                genai.protos.Content(
+                                    parts=[genai.protos.Part(
+                                        function_response=genai.protos.FunctionResponse(
+                                            name=part.function_call.name,
+                                            response={"result": function_response}
+                                        )
+                                    )]
+                                )
+                            ])
             
-            return response.text
+            # 取得最終回應
+            final_response = response.text
+            
+            # 儲存對話歷史
+            self._save_conversation(user_id, message, final_response)
+            
+            return final_response
             
         except Exception as e:
             logger.error(f"Gemini API error: {str(e)}")
             return "抱歉，我現在無法回應您的訊息。請稍後再試。"
+    
+    def _handle_function_call(self, function_call):
+        """處理 function call"""
+        function_name = function_call.name
+        args = dict(function_call.args)
+        
+        logger.info(f"Handling function call: {function_name} with args: {args}")
+        
+        if function_name == "create_calendar_event":
+            return self._create_event_handler(args)
+        elif function_name == "list_calendar_events":
+            return self._list_events_handler(args)
+        elif function_name == "delete_calendar_event":
+            return self._delete_event_handler(args)
+        else:
+            return {"error": f"Unknown function: {function_name}"}
+    
+    def _create_event_handler(self, args):
+        """處理建立事件的請求"""
+        try:
+            # 解析日期和時間
+            date_str = args.get('date')
+            time_str = args.get('time', '09:00')
+            duration = args.get('duration_hours', 1)
+            
+            # 建立 datetime 物件
+            datetime_str = f"{date_str}T{time_str}:00"
+            start_time = datetime.fromisoformat(datetime_str)
+            end_time = start_time + timedelta(hours=duration)
+            
+            # 呼叫 Calendar Service
+            result = self.calendar_service.create_event(
+                summary=args.get('summary'),
+                start_time=start_time.isoformat(),
+                end_time=end_time.isoformat(),
+                description=args.get('description'),
+                location=args.get('location')
+            )
+            
+            if result.get('success'):
+                return {
+                    "success": True,
+                    "message": f"已成功建立行程「{args.get('summary')}」",
+                    "event_id": result.get('event_id'),
+                    "link": result.get('link')
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "建立行程失敗",
+                    "error": result.get('error')
+                }
+                
+        except Exception as e:
+            logger.error(f"Error creating event: {str(e)}")
+            return {
+                "success": False,
+                "message": "建立行程時發生錯誤",
+                "error": str(e)
+            }
+    
+    def _list_events_handler(self, args):
+        """處理查詢事件的請求"""
+        try:
+            # 解析查詢參數
+            date_str = args.get('date', 'today')
+            days_ahead = args.get('days_ahead', 1)
+            
+            # 計算時間範圍
+            if date_str == 'today':
+                start_date = datetime.now()
+            elif date_str == 'tomorrow':
+                start_date = datetime.now() + timedelta(days=1)
+            else:
+                start_date = datetime.fromisoformat(date_str)
+            
+            # 設定為當天開始
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            
+            # 查詢行程
+            result = self.calendar_service.list_events(
+                max_results=10,
+                time_min=start_date.isoformat() + 'Z'
+            )
+            
+            if result.get('success'):
+                events = result.get('events', [])
+                if not events:
+                    return {
+                        "success": True,
+                        "message": "沒有找到任何行程",
+                        "events": []
+                    }
+                
+                # 格式化事件列表
+                formatted_events = []
+                for event in events:
+                    formatted_events.append(
+                        self.calendar_service.format_event_for_display(event)
+                    )
+                
+                return {
+                    "success": True,
+                    "message": f"找到 {len(events)} 個行程",
+                    "events": formatted_events
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "查詢行程失敗",
+                    "error": result.get('error')
+                }
+                
+        except Exception as e:
+            logger.error(f"Error listing events: {str(e)}")
+            return {
+                "success": False,
+                "message": "查詢行程時發生錯誤",
+                "error": str(e)
+            }
+    
+    def _delete_event_handler(self, args):
+        """處理刪除事件的請求"""
+        try:
+            event_id = args.get('event_id')
+            result = self.calendar_service.delete_event(event_id)
+            
+            if result.get('success'):
+                return {
+                    "success": True,
+                    "message": "已成功刪除行程"
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "刪除行程失敗",
+                    "error": result.get('error')
+                }
+                
+        except Exception as e:
+            logger.error(f"Error deleting event: {str(e)}")
+            return {
+                "success": False,
+                "message": "刪除行程時發生錯誤",
+                "error": str(e)
+            }
     
     def _build_context(self, user_id: str, message: str) -> str:
         """建立包含對話歷史的上下文"""
         # 系統提示詞
         system_prompt = """你是一個友善的 AI 助理，請用繁體中文回答。
 請保持回答簡潔清楚，並且親切有禮。
-如果使用者詢問你的身份，請告訴他們你是 Persona Cruz AI 助理。"""
+如果使用者詢問你的身份，請告訴他們你是 Persona Cruz AI 助理。
+
+你可以幫助使用者管理 Google Calendar：
+- 建立新的行程（例如：幫我安排明天下午3點開會）
+- 查詢行程（例如：我明天有什麼行程？）
+- 刪除行程（需要提供事件ID）
+
+當使用者要求日曆相關操作時，請使用提供的函數來完成。"""
         
         # 組合對話歷史
         history = self.conversation_history.get(user_id, [])
