@@ -7,6 +7,7 @@ import google.generativeai as genai
 from linebot import LineBotApi
 from linebot.exceptions import LineBotApiError
 import json
+import subprocess
 
 logger = logging.getLogger(__name__)
 
@@ -25,25 +26,58 @@ class TestAgent:
     """
     
     def __init__(self):
-        self.memory_file = "/tmp/test_memory.json"
+        # 在 Railway 環境使用環境變數存儲記憶
+        self.is_railway = os.getenv('RAILWAY_ENVIRONMENT') is not None
+        self.memory_file = "/tmp/test_memory.json" if not self.is_railway else None
         self.memory = self._load_memory()
         self.personality = "🧪 資深測試專員"
         self.project_root = os.path.dirname(os.path.abspath(__file__))  # 專案根目錄
     
     def _load_memory(self):
         """載入測試記憶"""
-        try:
-            if os.path.exists(self.memory_file):
-                with open(self.memory_file, 'r') as f:
-                    return json.load(f)
-        except:
-            pass
+        if self.is_railway:
+            # 在 Railway 環境，使用預設記憶並加入 Git 歷史
+            memory = self._get_default_memory()
+            memory["deployment_note"] = "Railway 環境每次部署都是新容器"
+            
+            # 嘗試讀取最近的 git log
+            try:
+                result = subprocess.run(
+                    ['git', 'log', '--oneline', '-10'],
+                    capture_output=True, text=True, cwd=self.project_root
+                )
+                if result.returncode == 0:
+                    commits = result.stdout.strip().split('\n')
+                    memory["git_commits"] = [
+                        {"commit": c.split(' ', 1)[0], "message": c.split(' ', 1)[1] if ' ' in c else c}
+                        for c in commits if c
+                    ]
+                    memory["last_known_commit"] = commits[0] if commits else "unknown"
+            except:
+                pass
+                
+            return memory
+        else:
+            # 本地環境使用檔案系統
+            try:
+                if self.memory_file and os.path.exists(self.memory_file):
+                    with open(self.memory_file, 'r') as f:
+                        return json.load(f)
+            except:
+                pass
+        
+        return self._get_default_memory()
+    
+    def _get_default_memory(self):
+        """取得預設記憶結構"""
         return {
             "test_history": [],
             "patterns": {},
             "reflections": [],  # 反思記錄
             "wisdom": [],  # 累積的智慧
-            "code_analysis": []  # 程式碼分析記錄
+            "code_analysis": [],  # 程式碼分析記錄
+            "git_commits": [],  # Git commit 歷史
+            "created_at": datetime.now().isoformat()
         }
     
     def remember_test(self, test_name, success, duration, error=None):
@@ -183,14 +217,27 @@ class TestAgent:
     
     def _save_memory(self):
         """儲存測試記憶"""
-        try:
-            with open(self.memory_file, 'w') as f:
-                json.dump(self.memory, f, indent=2)
-        except:
-            pass
+        if self.is_railway:
+            # Railway 環境無法持久化，只能記錄在日誌中
+            logger.info(f"測試專員記憶摘要: {len(self.memory['test_history'])} 個測試記錄")
+            if self.memory.get('git_commits'):
+                logger.info(f"最新 commit: {self.memory['git_commits'][0]['message']}")
+        else:
+            # 本地環境存檔
+            try:
+                if self.memory_file:
+                    with open(self.memory_file, 'w') as f:
+                        json.dump(self.memory, f, indent=2)
+            except:
+                pass
     
     def get_insights(self):
         """取得測試洞察 - 展現測試專員的個性"""
+        # 檢查是否在 Railway 環境
+        if self.is_railway and self.memory.get("git_commits"):
+            latest_commit = self.memory["git_commits"][0]["message"]
+            return f"{self.personality} 報告：Railway 新部署！最新 commit: {latest_commit[:50]}... 讓我看看這次更新了什麼！"
+        
         if not self.memory["test_history"]:
             return f"{self.personality} 報告：這是我第一次執行測試！充滿期待和好奇心！🚀"
         
