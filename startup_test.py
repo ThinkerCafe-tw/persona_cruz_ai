@@ -215,6 +215,29 @@ class TestAgent:
         if len(self.memory["wisdom"]) > 10:
             self.memory["wisdom"] = self.memory["wisdom"][-10:]
     
+    def record_development_insight(self, event_type, insight, lesson_learned=None):
+        """記錄開發過程中的洞察和學習"""
+        development_record = {
+            "time": datetime.now().isoformat(),
+            "event_type": event_type,  # 如：bug_fix, feature_add, error_analysis
+            "insight": insight,
+            "lesson_learned": lesson_learned,
+            "git_context": self.memory.get("git_commits", [])[:1]  # 記錄當前 commit
+        }
+        
+        # 確保有 development_insights 區塊
+        if "development_insights" not in self.memory:
+            self.memory["development_insights"] = []
+        
+        self.memory["development_insights"].append(development_record)
+        
+        # 只保留最近 50 個開發洞察
+        if len(self.memory["development_insights"]) > 50:
+            self.memory["development_insights"] = self.memory["development_insights"][-50:]
+        
+        self._save_memory()
+        logger.info(f"測試專員記錄開發洞察: {event_type} - {insight[:50]}...")
+    
     def _save_memory(self):
         """儲存測試記憶"""
         if self.is_railway:
