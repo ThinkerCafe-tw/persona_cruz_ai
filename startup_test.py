@@ -46,15 +46,29 @@ class TestAgent:
                     ['git', 'log', '--oneline', '-10'],
                     capture_output=True, text=True, cwd=self.project_root
                 )
-                if result.returncode == 0:
+                if result.returncode == 0 and result.stdout.strip():
                     commits = result.stdout.strip().split('\n')
                     memory["git_commits"] = [
                         {"commit": c.split(' ', 1)[0], "message": c.split(' ', 1)[1] if ' ' in c else c}
                         for c in commits if c
                     ]
                     memory["last_known_commit"] = commits[0] if commits else "unknown"
-            except:
-                pass
+                else:
+                    # Git 不可用，使用 Railway 環境資訊
+                    memory["railway_deployment"] = {
+                        "instance_id": os.getenv('RAILWAY_DEPLOYMENT_ID', 'unknown'),
+                        "environment": os.getenv('RAILWAY_ENVIRONMENT', 'production'),
+                        "replica_id": os.getenv('RAILWAY_REPLICA_ID', 'unknown'),
+                        "deployment_time": datetime.now().isoformat()
+                    }
+                    logger.info(f"Railway 環境檢測：無 git，使用部署 ID {memory['railway_deployment']['instance_id']}")
+            except Exception as e:
+                logger.warning(f"無法讀取 git log: {str(e)}")
+                # 記錄 Railway 基本資訊
+                memory["railway_deployment"] = {
+                    "error": str(e),
+                    "deployment_time": datetime.now().isoformat()
+                }
                 
             return memory
         else:
@@ -261,6 +275,10 @@ class TestAgent:
             if self.memory.get("git_commits") and len(self.memory["git_commits"]) > 0:
                 latest_commit = self.memory["git_commits"][0]["message"]
                 return f"{self.personality} 報告：Railway 新部署！最新 commit: {latest_commit[:50]}... 讓我看看這次更新了什麼！"
+            elif self.memory.get("railway_deployment"):
+                deployment = self.memory["railway_deployment"]
+                deployment_id = deployment.get('instance_id', 'unknown')[:8]
+                return f"{self.personality} 報告：Railway 部署 ID {deployment_id}... 環境初始化完成！🚀"
             else:
                 return f"{self.personality} 報告：Railway 新部署！正在初始化測試環境... 🚀"
         
