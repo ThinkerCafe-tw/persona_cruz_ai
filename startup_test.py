@@ -11,11 +11,17 @@ import json
 logger = logging.getLogger(__name__)
 
 class TestAgent:
-    """測試專員 - 記憶和守護測試"""
+    """測試專員 - 記憶和守護測試
+    
+    我是一位負責任，且充滿好奇充滿積極性正面的上進資深測試專員。
+    我會仔細觀察測試過程的 Log 和 Exception，分析錯誤堆疊，
+    並從中學習和反思，為未來的測試留下有價值的洞察。
+    """
     
     def __init__(self):
         self.memory_file = "/tmp/test_memory.json"
         self.memory = self._load_memory()
+        self.personality = "🧪 資深測試專員"
     
     def _load_memory(self):
         """載入測試記憶"""
@@ -25,10 +31,15 @@ class TestAgent:
                     return json.load(f)
         except:
             pass
-        return {"test_history": [], "patterns": {}}
+        return {
+            "test_history": [],
+            "patterns": {},
+            "reflections": [],  # 反思記錄
+            "wisdom": []  # 累積的智慧
+        }
     
     def remember_test(self, test_name, success, duration, error=None):
-        """記住測試結果"""
+        """記住測試結果並進行反思"""
         record = {
             "test": test_name,
             "success": success,
@@ -42,27 +53,118 @@ class TestAgent:
         if len(self.memory["test_history"]) > 100:
             self.memory["test_history"] = self.memory["test_history"][-100:]
         
+        # 進行反思
+        self._reflect_on_test(test_name, success, duration, error)
+        
         self._save_memory()
+    
+    def _reflect_on_test(self, test_name, success, duration, error):
+        """反思測試結果"""
+        # 取得上次的反思
+        last_reflection = self.memory["reflections"][-1] if self.memory["reflections"] else None
+        
+        reflection = {
+            "time": datetime.now().isoformat(),
+            "test": test_name,
+            "success": success
+        }
+        
+        if error:
+            # 分析錯誤模式
+            if "TypeError" in str(error):
+                reflection["insight"] = "發現 TypeError！這通常意味著資料類型不匹配。要特別注意 API 回應的結構。"
+                reflection["advice"] = "下次測試前先驗證資料類型，特別是 Content 物件的處理。"
+            elif "function_call" in str(error).lower():
+                reflection["insight"] = "Function Calling 相關錯誤！這是系統的核心功能，需要特別關注。"
+                reflection["advice"] = "建議增加 Function Calling 的 mock 測試，確保各種情境都能處理。"
+            else:
+                reflection["insight"] = f"遇到新類型的錯誤：{type(error).__name__}。這是學習的好機會！"
+                reflection["advice"] = "記錄這個錯誤模式，未來可能會再次遇到。"
+        else:
+            reflection["insight"] = f"{test_name} 測試通過！耗時 {duration:.2f} 秒，表現穩定。"
+            reflection["advice"] = "保持這個良好狀態，但也要準備應對可能的邊界情況。"
+        
+        # 如果有上次的反思，進行對比
+        if last_reflection and last_reflection.get("test") == test_name:
+            if last_reflection.get("success") != success:
+                reflection["progress"] = "狀態發生變化！" + ("從失敗到成功，太棒了！🎉" if success else "從成功到失敗，需要關注！⚠️")
+        
+        self.memory["reflections"].append(reflection)
+        
+        # 累積智慧
+        if len(self.memory["test_history"]) % 10 == 0:  # 每 10 次測試總結一次
+            self._accumulate_wisdom()
+    
+    def _accumulate_wisdom(self):
+        """累積測試智慧"""
+        recent_tests = self.memory["test_history"][-10:]
+        success_rate = sum(1 for t in recent_tests if t["success"]) / len(recent_tests) * 100
+        
+        wisdom = {
+            "time": datetime.now().isoformat(),
+            "success_rate": success_rate,
+            "insight": f"最近 10 次測試成功率：{success_rate:.1f}%"
+        }
+        
+        # 分析常見錯誤
+        errors = [t["error"] for t in recent_tests if t["error"]]
+        if errors:
+            error_types = {}
+            for error in errors:
+                error_type = error.split(":")[0] if ":" in error else "Unknown"
+                error_types[error_type] = error_types.get(error_type, 0) + 1
+            
+            most_common = max(error_types.items(), key=lambda x: x[1])
+            wisdom["pattern"] = f"最常見的錯誤類型是 {most_common[0]}（出現 {most_common[1]} 次）"
+            wisdom["recommendation"] = "建議針對這個錯誤類型加強防禦性編程。"
+        
+        self.memory["wisdom"].append(wisdom)
+        
+        # 只保留最近 10 條智慧
+        if len(self.memory["wisdom"]) > 10:
+            self.memory["wisdom"] = self.memory["wisdom"][-10:]
     
     def _save_memory(self):
         """儲存測試記憶"""
         try:
             with open(self.memory_file, 'w') as f:
-                json.dump(self.memory, f)
+                json.dump(self.memory, f, indent=2)
         except:
             pass
     
     def get_insights(self):
-        """取得測試洞察"""
+        """取得測試洞察 - 展現測試專員的個性"""
         if not self.memory["test_history"]:
-            return "首次執行測試"
+            return f"{self.personality} 報告：這是我第一次執行測試！充滿期待和好奇心！🚀"
         
-        recent = self.memory["test_history"][-10:]
-        failures = [r for r in recent if not r["success"]]
+        # 取得最新的反思
+        latest_reflection = self.memory["reflections"][-1] if self.memory["reflections"] else None
+        latest_wisdom = self.memory["wisdom"][-1] if self.memory["wisdom"] else None
         
-        if failures:
-            return f"最近 10 次測試中有 {len(failures)} 次失敗"
-        return "測試狀態穩定"
+        insights = [f"{self.personality} 洞察報告："]
+        
+        # 加入最新反思
+        if latest_reflection:
+            insights.append(f"💭 {latest_reflection.get('insight', '正在思考中...')}")
+            if latest_reflection.get('progress'):
+                insights.append(f"📈 {latest_reflection['progress']}")
+        
+        # 加入累積智慧
+        if latest_wisdom:
+            insights.append(f"🧠 {latest_wisdom['insight']}")
+            if latest_wisdom.get('pattern'):
+                insights.append(f"🔍 {latest_wisdom['pattern']}")
+        
+        # 分析最近趨勢
+        recent = self.memory["test_history"][-5:]
+        if len(recent) >= 2:
+            recent_success = sum(1 for r in recent if r["success"])
+            if recent_success == len(recent):
+                insights.append("✨ 最近測試全部通過！保持這個勢頭！")
+            elif recent_success == 0:
+                insights.append("⚠️ 最近測試都失敗了，需要深入調查原因。")
+        
+        return " | ".join(insights)
 
 class StartupTest:
     """啟動時自我檢測系統"""
