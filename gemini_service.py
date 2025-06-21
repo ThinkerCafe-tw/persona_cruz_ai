@@ -147,7 +147,6 @@ class GeminiService:
                             # 將 function 結果回傳給模型
                             response = self.model.generate_content([
                                 context,
-                                response.candidates[0].content,
                                 genai.protos.Content(
                                     parts=[genai.protos.Part(
                                         function_response=genai.protos.FunctionResponse(
