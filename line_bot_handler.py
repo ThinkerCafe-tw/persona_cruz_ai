@@ -31,7 +31,7 @@ class LineBotHandler:
         """處理 webhook 請求"""
         self.handler.handle(body, signature)
     
-    def handle_text_message(self, event):
+    def handle_text_message(self, event, destination=None):
         """處理文字訊息"""
         user_id = event.source.user_id
         message_text = event.message.text.strip()
