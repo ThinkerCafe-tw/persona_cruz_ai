@@ -11,6 +11,7 @@ from linebot.models import (
 from config import Config
 from gemini_service import GeminiService
 from jokes import get_random_joke
+from quantum_integration import quantum_integration
 import json
 
 logger = logging.getLogger(__name__)
@@ -58,6 +59,17 @@ class LineBotHandler:
                 reply_text = self.gemini_service.get_response(user_id, message_text)
             elif message_text in ['/harmony', '/和諧度']:
                 reply_text = self.gemini_service.get_response(user_id, message_text)
+            # 量子記憶系統指令
+            elif message_text in ['/quantum', '/量子']:
+                reply_text = quantum_integration.get_quantum_status()
+            elif message_text.startswith('/quantum '):
+                # 查看特定角色的量子記憶
+                persona = message_text.split(' ', 1)[1]
+                reply_text = quantum_integration.get_persona_quantum_report(persona)
+            elif message_text in ['/entangle', '/糾纏']:
+                reply_text = quantum_integration.get_entanglement_status()
+            elif message_text in ['/evolve', '/演化']:
+                reply_text = quantum_integration.get_evolution_insights()
             # CRUZ 模式指令
             elif message_text in ['/cruz', '/CRUZ', '切換到CRUZ']:
                 self.gemini_service.cruz_mode = True
@@ -70,6 +82,18 @@ class LineBotHandler:
             else:
                 # 一般對話，交給 Gemini 處理
                 reply_text = self.gemini_service.get_response(user_id, message_text)
+                
+                # 將對話同步到量子記憶系統
+                try:
+                    current_role = self._get_current_role()
+                    quantum_integration.process_conversation(
+                        user_id=user_id,
+                        message=message_text,
+                        response=reply_text,
+                        current_role=current_role
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to sync to quantum memory: {e}")
             
             # 發送回覆
             self._send_reply(event.reply_token, reply_text)
@@ -116,6 +140,12 @@ class LineBotHandler:
 • 說「測試」- 切換到水屬性測試專員
 • 說「卡住了」- 召喚無極觀察者
 
+【量子記憶】
+• /quantum - 查看量子記憶系統狀態
+• /quantum <角色> - 查看特定角色量子記憶
+• /entangle - 查看量子糾纏關係
+• /evolve - 查看演化洞察
+
 【系統指令】
 • /help 或 幫助 - 顯示此說明
 • /clear 或 清除對話 - 清除對話記錄
@@ -156,3 +186,13 @@ class LineBotHandler:
             results.append("❌ 五行系統異常")
         
         return "🔧 系統自我測試結果：\n\n" + "\n".join(results)
+    
+    def _get_current_role(self):
+        """獲取當前活躍的角色"""
+        if self.gemini_service.cruz_mode:
+            return "CRUZ"
+        elif self.gemini_service.element_mode and hasattr(self.gemini_service, 'five_elements'):
+            current = self.gemini_service.five_elements.get_current_element()
+            if current:
+                return current.name
+        return "AI助理"
