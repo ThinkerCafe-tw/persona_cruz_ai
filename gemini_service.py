@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from calendar_service import CalendarService
 from five_elements_agent import FiveElementsAgent
+from cruz_persona_system import CruzPersonaSystem
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,10 @@ class GeminiService:
         # 初始化五行系統
         self.five_elements = FiveElementsAgent()
         self.element_mode = False  # 是否啟用五行模式
+        
+        # 初始化 CRUZ 人格系統
+        self.cruz_persona = CruzPersonaSystem()
+        self.cruz_mode = False  # 是否啟用 CRUZ 模式
         
     def _get_calendar_tools(self):
         """定義日曆相關的工具函數"""
@@ -435,8 +440,13 @@ class GeminiService:
         # 檢查是否需要切換角色或使用五行系統
         element_context = self._check_element_trigger(message)
         
-        # 根據是否啟用五行模式選擇不同的系統提示詞
-        if element_context:
+        # 檢查是否啟用 CRUZ 模式
+        cruz_context = self._check_cruz_mode(message)
+        
+        # 根據優先級選擇系統提示詞
+        if cruz_context:
+            system_prompt = cruz_context
+        elif element_context:
             system_prompt = element_context
         else:
             # 原本的系統提示詞
@@ -528,5 +538,28 @@ class GeminiService:
                 if keyword in message_lower:
                     self.five_elements.switch_role(element)
                     return self.five_elements.get_role_prompt(element)
+        
+        return None
+    
+    def _check_cruz_mode(self, message: str) -> Optional[str]:
+        """檢查是否需要啟動 CRUZ 模式"""
+        message_lower = message.lower()
+        
+        # CRUZ 模式觸發詞
+        cruz_triggers = [
+            "cruz", "tang", "湯明", "tangcruzz",
+            "思考者咖啡", "創業", "創造",
+            "你是誰", "自我介紹"
+        ]
+        
+        # 檢查是否有觸發詞
+        for trigger in cruz_triggers:
+            if trigger in message_lower:
+                self.cruz_mode = True
+                return self.cruz_persona.generate_cruz_prompt(message)
+        
+        # 如果已經在 CRUZ 模式，保持模式
+        if self.cruz_mode:
+            return self.cruz_persona.generate_cruz_prompt(message)
         
         return None

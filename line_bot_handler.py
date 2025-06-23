@@ -58,6 +58,15 @@ class LineBotHandler:
                 reply_text = self.gemini_service.get_response(user_id, message_text)
             elif message_text in ['/harmony', '/和諧度']:
                 reply_text = self.gemini_service.get_response(user_id, message_text)
+            # CRUZ 模式指令
+            elif message_text in ['/cruz', '/CRUZ', '切換到CRUZ']:
+                self.gemini_service.cruz_mode = True
+                self.gemini_service.element_mode = False
+                reply_text = "已切換到 CRUZ 模式！我是 CRUZ，很高興能和你聊天。有什麼想討論的嗎？"
+            elif message_text in ['/ai', '/AI', '切換到AI']:
+                self.gemini_service.cruz_mode = False
+                self.gemini_service.element_mode = False
+                reply_text = "已切換回 AI 助理模式。"
             else:
                 # 一般對話，交給 Gemini 處理
                 reply_text = self.gemini_service.get_response(user_id, message_text)
@@ -93,6 +102,11 @@ class LineBotHandler:
 • 日曆管理：「幫我安排明天下午3點開會」
 • 查詢行程：「我明天有什麼行程？」
 • 說個笑話：輕鬆一下！
+
+【CRUZ 模式】
+• /cruz - 切換到 CRUZ 本人對話
+• /ai - 切換回 AI 助理模式
+• 說「創業」「創造」會自動觸發 CRUZ 模式
 
 【五行系統】
 • /dashboard - 查看完整系統儀表板
