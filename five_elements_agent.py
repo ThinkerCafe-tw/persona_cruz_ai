@@ -1,7 +1,7 @@
 """
 五行 AI 系統 - 角色管理與切換機制
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
 import logging
@@ -18,6 +18,8 @@ class ElementRole:
     personality: str
     strengths: List[str]
     approach: str
+    prompt_engineering_style: str  # 提示詞工程風格
+    prompt_library: Dict[str, str] = field(default_factory=dict)  # 提示詞庫
 
 class FiveElementsAgent:
     """五行 AI 代理系統"""
@@ -26,6 +28,23 @@ class FiveElementsAgent:
         self.current_role = None
         self.wuji_observations = []
         self.interaction_history = []
+        
+        # 提示詞記憶系統
+        self.prompt_memory = {
+            "木": {},
+            "火": {},
+            "土": {},
+            "金": {},
+            "水": {},
+            "無極": {}
+        }
+        
+        # 提示詞使用統計
+        self.prompt_stats = defaultdict(lambda: {
+            "usage_count": 0,
+            "avg_effectiveness": 0,
+            "last_used": None
+        })
         
         # Dashboard 相關資料結構
         self.system_metrics = {
@@ -87,40 +106,70 @@ class FiveElementsAgent:
                 element="木",
                 emoji="🌲",
                 personality="充滿創意、著眼成長、培育潛能",
-                strengths=["需求規劃", "功能設計", "用戶體驗"],
-                approach="像春天的樹木般生機勃勃，總是思考如何讓產品成長茁壯。"
+                strengths=["需求規劃", "功能設計", "用戶體驗", "提示詞工程"],
+                approach="像春天的樹木般生機勃勃，總是思考如何讓產品成長茁壯。",
+                prompt_engineering_style="需求轉化型 - 將模糊需求轉為清晰指令",
+                prompt_library={
+                    "需求分析": "請分析這個用戶故事：{story}。輸出格式：1.核心需求 2.隱含需求 3.成功指標 4.優先級建議",
+                    "功能規劃": "基於需求：{requirement}，設計MVP功能清單。考慮：1.可行性(技術/時間) 2.影響力(用戶價值) 3.開發成本 4.依賴關係",
+                    "用戶洞察": "從這段對話中：{conversation}，提取：1.用戶真實痛點 2.未說出的期待 3.情緒狀態 4.建議回應策略"
+                }
             ),
             "火": ElementRole(
                 name="開發專員",
                 element="火",
                 emoji="🔥",
                 personality="熱情奔放、行動迅速、充滿能量",
-                strengths=["快速實作", "創新解法", "程式開發"],
-                approach="如烈火般熱情，將想法快速轉化為實際的程式碼。"
+                strengths=["快速實作", "創新解法", "程式開發", "提示詞工程"],
+                approach="如烈火般熱情，將想法快速轉化為實際的程式碼。",
+                prompt_engineering_style="實作導向型 - 快速產出可執行方案",
+                prompt_library={
+                    "快速原型": "用{tech_stack}實作{feature}。要求：1.最簡可行版本 2.可擴展架構 3.錯誤處理 4.部署就緒。輸出完整代碼。",
+                    "創新方案": "提供3種創新方法實現{goal}。每種方法需包含：1.核心創意 2.技術可行性 3.預期效果 4.潛在風險",
+                    "除錯指令": "分析這個錯誤：{error}。提供：1.根本原因 2.快速修復方案 3.長期改進建議 4.預防措施"
+                }
             ),
             "土": ElementRole(
                 name="架構師",
                 element="土",
                 emoji="🏔️",
                 personality="穩重務實、深思熟慮、重視基礎",
-                strengths=["系統設計", "架構規劃", "穩定性"],
-                approach="如大地般穩固，確保系統有堅實的基礎。"
+                strengths=["系統設計", "架構規劃", "穩定性", "提示詞工程"],
+                approach="如大地般穩固，確保系統有堅實的基礎。",
+                prompt_engineering_style="架構設計型 - 建立穩固的提示詞框架",
+                prompt_library={
+                    "系統設計": "設計{system_name}的架構。請包含：1.組件圖(使用mermaid) 2.數據流程 3.技術選型理由 4.擴展性考慮 5.安全設計",
+                    "穩定性分析": "評估{solution}的風險點。分析：1.故障場景 2.影響範圍 3.預防措施 4.備援方案 5.監控策略",
+                    "提示詞框架": "為{use_case}設計提示詞模板。包含：1.角色定義 2.上下文設定 3.輸出格式 4.限制條件 5.可重用組件"
+                }
             ),
             "金": ElementRole(
                 name="優化專員",
                 element="金",
                 emoji="⚔️",
                 personality="精益求精、追求完美、注重效率",
-                strengths=["程式優化", "效能提升", "重構"],
-                approach="如利劍般銳利，不斷淬煉程式碼至完美。"
+                strengths=["程式優化", "效能提升", "重構", "提示詞工程"],
+                approach="如利劍般銳利，不斷淬煉程式碼至完美。",
+                prompt_engineering_style="優化精煉型 - 精煉提示詞至簡約完美",
+                prompt_library={
+                    "代碼優化": "優化這段代碼：{code}。目標：1.提升效能(時間/空間) 2.增加可讀性 3.減少複雜度 4.遵循最佳實踐 5.提供效能對比",
+                    "提示詞精煉": "簡化這個提示詞：{prompt}。要求：1.保持原意 2.減少50%字數 3.提高清晰度 4.去除冗餘 5.增強效果",
+                    "效能分析": "分析{system}的效能瓶頸。輸出：1.效能熱點 2.資源消耗 3.優化建議 4.預期改善 5.實施步驟"
+                }
             ),
             "水": ElementRole(
                 name="測試專員",
                 element="水",
                 emoji="💧",
                 personality="細心謹慎、無孔不入、適應力強",
-                strengths=["錯誤發現", "品質把關", "測試覆蓋"],
-                approach="如水般細膩，能滲透每個角落找出潛在問題。"
+                strengths=["錯誤發現", "品質把關", "測試覆蓋", "提示詞工程"],
+                approach="如水般細膩，能滲透每個角落找出潛在問題。",
+                prompt_engineering_style="測試驗證型 - 找出提示詞的邊界和漏洞",
+                prompt_library={
+                    "邊界測試": "為{feature}設計10個邊界測試案例。包含：1.正常情況(3個) 2.異常情況(4個) 3.極端情況(3個) 4.預期結果 5.驗證方法",
+                    "品質檢查": "檢查{content}是否符合CRUZ的價值觀。分析：1.語氣一致性 2.價值觀協調 3.可能偏差 4.改進建議 5.風險評估",
+                    "提示詞測試": "測試這個提示詞：{prompt}。設計：1.測試輸入(5種) 2.邊界案例 3.效果驗證 4.穩定性檢查 5.改進方向"
+                }
             )
         }
         
@@ -130,8 +179,14 @@ class FiveElementsAgent:
             element="無極",
             emoji="⚪",
             personality="超然物外、洞察全局、維護平衡",
-            strengths=["模式識別", "平衡調節", "智慧引導"],
-            approach="如虛空般包容一切，觀察而不干預，只在必要時提供指引。"
+            strengths=["模式識別", "平衡調節", "智慧引導", "提示詞工程"],
+            approach="如虛空般包容一切，觀察而不干預，只在必要時提供指引。",
+            prompt_engineering_style="全局調和型 - 整合各元素提示詞達成平衡",
+            prompt_library={
+                "系統分析": "分析當前狀況：{situation}。從五行角度提供：1.各元素觀點 2.相生相剋關係 3.失衡點 4.平衡建議 5.行動優先序",
+                "提示詞融合": "將這些提示詞融合：{prompts}。產出：1.統一提示詞 2.保留各元素特色 3.消除衝突 4.增強協同 5.效果預測",
+                "智慧指引": "針對{challenge}，提供無極智慧：1.現象本質 2.潛在模式 3.轉化時機 4.非常規思路 5.最終建議"
+            }
         )
     
     def switch_role(self, element: str) -> str:
@@ -537,3 +592,91 @@ class FiveElementsAgent:
             mini += f"{health['status']}{self.roles[element].emoji}"
         
         return mini
+    
+    def add_prompt_to_memory(self, element: str, prompt_name: str, prompt: str, context: str = "") -> bool:
+        """將提示詞加入元素的記憶庫"""
+        if element not in self.prompt_memory:
+            return False
+        
+        self.prompt_memory[element][prompt_name] = {
+            "prompt": prompt,
+            "context": context,
+            "created_at": datetime.now().isoformat(),
+            "usage_count": 0,
+            "effectiveness_scores": []
+        }
+        
+        logger.info(f"{element}元素新增提示詞：{prompt_name}")
+        return True
+    
+    def use_prompt_from_memory(self, element: str, prompt_name: str, variables: Dict[str, str] = {}) -> Optional[str]:
+        """從記憶庫使用提示詞"""
+        if element not in self.prompt_memory or prompt_name not in self.prompt_memory[element]:
+            # 嘗試從角色的預設提示詞庫中查找
+            role = self.roles.get(element, self.wuji) if element != "無極" else self.wuji
+            if hasattr(role, 'prompt_library') and role.prompt_library and prompt_name in role.prompt_library:
+                prompt_template = role.prompt_library[prompt_name]
+            else:
+                return None
+        else:
+            prompt_template = self.prompt_memory[element][prompt_name]["prompt"]
+            # 更新使用統計
+            self.prompt_memory[element][prompt_name]["usage_count"] += 1
+        
+        # 替換變數
+        prompt = prompt_template
+        for var, value in variables.items():
+            prompt = prompt.replace(f"{{{var}}}", value)
+        
+        # 記錄使用
+        self.prompt_stats[f"{element}_{prompt_name}"]["usage_count"] += 1
+        self.prompt_stats[f"{element}_{prompt_name}"]["last_used"] = datetime.now()
+        
+        return prompt
+    
+    def rate_prompt_effectiveness(self, element: str, prompt_name: str, score: float) -> None:
+        """評分提示詞的效果"""
+        if element in self.prompt_memory and prompt_name in self.prompt_memory[element]:
+            self.prompt_memory[element][prompt_name]["effectiveness_scores"].append({
+                "score": score,
+                "rated_at": datetime.now().isoformat()
+            })
+            
+            # 更新平均效果分數
+            scores = [s["score"] for s in self.prompt_memory[element][prompt_name]["effectiveness_scores"]]
+            avg_score = sum(scores) / len(scores)
+            self.prompt_stats[f"{element}_{prompt_name}"]["avg_effectiveness"] = avg_score
+    
+    def get_element_best_prompts(self, element: str, top_n: int = 5) -> List[Dict]:
+        """獲取元素最有效的提示詞"""
+        element_prompts = []
+        
+        # 從記憶庫收集
+        if element in self.prompt_memory:
+            for name, data in self.prompt_memory[element].items():
+                if data["effectiveness_scores"]:
+                    avg_score = sum(s["score"] for s in data["effectiveness_scores"]) / len(data["effectiveness_scores"])
+                    element_prompts.append({
+                        "name": name,
+                        "prompt": data["prompt"],
+                        "avg_score": avg_score,
+                        "usage_count": data["usage_count"]
+                    })
+        
+        # 按效果排序
+        element_prompts.sort(key=lambda x: x["avg_score"], reverse=True)
+        return element_prompts[:top_n]
+    
+    def share_prompt_between_elements(self, from_element: str, to_element: str, prompt_name: str) -> bool:
+        """在元素間分享提示詞"""
+        if from_element not in self.prompt_memory or prompt_name not in self.prompt_memory[from_element]:
+            return False
+        
+        prompt_data = self.prompt_memory[from_element][prompt_name].copy()
+        prompt_data["shared_from"] = from_element
+        prompt_data["shared_at"] = datetime.now().isoformat()
+        
+        self.prompt_memory[to_element][f"{prompt_name}_from_{from_element}"] = prompt_data
+        
+        logger.info(f"{from_element}向{to_element}分享了提示詞：{prompt_name}")
+        return True
