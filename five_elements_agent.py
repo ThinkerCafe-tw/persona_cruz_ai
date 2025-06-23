@@ -65,6 +65,21 @@ class FiveElementsAgent:
             "last_called": None
         })
         
+        # 開發教訓記錄
+        self.development_lessons = {
+            "2024-06-23": {
+                "event": "Line Bot Handler 重寫錯誤",
+                "caused_by": "火（急於開發）",
+                "should_have": "土（先調查架構）",
+                "lesson": "空檔案不代表沒程式，先搜尋再動手",
+                "prevention_checklist": [
+                    "功能是否已存在？",
+                    "現有架構如何運作？", 
+                    "最小改動方案是什麼？"
+                ]
+            }
+        }
+        
         # 定義五行角色
         self.roles = {
             "木": ElementRole(

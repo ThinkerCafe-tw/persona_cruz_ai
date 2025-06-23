@@ -1,0 +1,62 @@
+{
+  "lessons": [
+    {
+      "date": "2024-06-23",
+      "title": "Line Bot Handler 重寫事件",
+      "severity": "high",
+      "category": "architecture",
+      "what_happened": "看到 line_bot_handler.py 是空檔案，就重寫了整個 webhook 處理邏輯",
+      "what_went_wrong": [
+        "未先搜尋現有實作",
+        "假設空檔案等於沒有程式碼",
+        "違反最小改動原則"
+      ],
+      "root_cause": "急於展示新功能，忽略了理解現有架構的重要性",
+      "impact": [
+        "部署後 Line Bot 無法正常運作",
+        "出現 TypeError: 參數數量不匹配",
+        "需要緊急修復"
+      ],
+      "correct_approach": [
+        "grep -r 'webhook\\|handler\\|message' . 搜尋相關程式碼",
+        "理解現有的訊息處理流程",
+        "基於現有架構做最小必要修改"
+      ],
+      "prevention": {
+        "checklist": [
+          "這個功能是否已存在？",
+          "現有架構如何運作？",
+          "最小改動方案是什麼？"
+        ],
+        "tools": [
+          "grep -r 搜尋關鍵字",
+          "find . -name 搜尋檔案",
+          "git log --grep 搜尋提交歷史"
+        ]
+      },
+      "five_elements_reflection": {
+        "木": "產品規劃時應考慮現有功能",
+        "火": "開發前需要冷靜調查",
+        "土": "架構師角色失職，應該先了解基礎",
+        "金": "優化應基於現有程式碼",
+        "水": "測試應包含整合測試"
+      },
+      "memorable_quote": "空檔案不代表沒程式，先搜尋再動手",
+      "tags": ["webhook", "line-bot", "architecture", "pre-flight-check"]
+    }
+  ],
+  "patterns": {
+    "empty_file_trap": {
+      "description": "看到空檔案就假設沒有實作",
+      "occurrences": 1,
+      "prevention": "永遠先搜尋整個專案"
+    }
+  },
+  "statistics": {
+    "total_lessons": 1,
+    "high_severity": 1,
+    "categories": {
+      "architecture": 1
+    }
+  }
+}

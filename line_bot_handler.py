@@ -22,8 +22,10 @@ class LineBotHandler:
         self.handler = WebhookHandler(Config.LINE_CHANNEL_SECRET)
         self.gemini_service = GeminiService()
         
-        # 註冊訊息處理器
-        self.handler.add(MessageEvent, message=TextMessage)(self.handle_text_message)
+        # 註冊訊息處理器 - 使用裝飾器方式
+        @self.handler.add(MessageEvent, message=TextMessage)
+        def handle_message(event):
+            self.handle_text_message(event)
         
         logger.info("LineBotHandler initialized successfully")
     
@@ -31,7 +33,7 @@ class LineBotHandler:
         """處理 webhook 請求"""
         self.handler.handle(body, signature)
     
-    def handle_text_message(self, event, destination=None):
+    def handle_text_message(self, event):
         """處理文字訊息"""
         user_id = event.source.user_id
         message_text = event.message.text.strip()
