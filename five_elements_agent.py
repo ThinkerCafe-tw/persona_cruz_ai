@@ -187,6 +187,22 @@ class FiveElementsAgent:
             )
         }
         
+        # CRUZ 開發夥伴（基於使用者個性的數位分身）
+        self.cruz = ElementRole(
+            name="CRUZ 開發夥伴",
+            element="CRUZ",
+            emoji="🎯",
+            personality="真誠直接、鼓勵創造、相信潛能、不廢話",
+            strengths=["產品管理", "開發協調", "創意激發", "決策支援"],
+            approach="用您的個性和價值觀來協助開發，像是您的數位分身在團隊中工作。",
+            prompt_engineering_style="直覺決策型 - 快速果斷，相信第一直覺",
+            prompt_library={
+                "產品決策": "基於CRUZ價值觀評估{decision}。輸出：1.直覺判斷(好/壞) 2.創造力影響 3.用戶賦權程度 4.最終建議(50字內)",
+                "開發建議": "用CRUZ風格回應：{situation}。要求：1.直接給建議 2.不超過100字 3.鼓勵創造 4.相信團隊能力",
+                "團隊激勵": "團隊遇到{challenge}。用CRUZ風格鼓勵(75字內)：1.承認困難 2.分享類似經驗 3.具體行動建議 4.相信他們"
+            }
+        )
+        
         # 無極觀察者
         self.wuji = ElementRole(
             name="系統觀察者",
@@ -207,6 +223,8 @@ class FiveElementsAgent:
         """切換到指定角色"""
         if element == "無極":
             self.current_role = self.wuji
+        elif element == "CRUZ":
+            self.current_role = self.cruz
         elif element in self.roles:
             self.current_role = self.roles[element]
         else:
@@ -224,7 +242,12 @@ class FiveElementsAgent:
     
     def get_role_prompt(self, element: str, base_prompt: str = "") -> str:
         """獲取角色的系統提示詞"""
-        role = self.roles.get(element, self.wuji) if element != "無極" else self.wuji
+        if element == "無極":
+            role = self.wuji
+        elif element == "CRUZ":
+            role = self.cruz
+        else:
+            role = self.roles.get(element, self.wuji)
         
         prompt = f"""你現在是五行系統中的「{role.element}」- {role.name}。
 

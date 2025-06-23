@@ -4,13 +4,17 @@
 
 ## 功能特色
 
-- 使用 Google Gemini AI 進行智能對話
-- 支援對話記憶功能
-- 內建 50 個冷笑話功能
-- Google Calendar 整合（建立、查詢行程）
-- 簡單的指令系統（/help、/clear、說個笑話）
-- 24/7 雲端運行
-- **無極 AI Agents OS** - 五行元素協作系統
+- 🤖 使用 Google Gemini AI 進行智能對話
+- 💬 支援對話記憶功能（每個用戶獨立）
+- 😄 內建 50 個冷笑話功能
+- 📅 Google Calendar 整合（建立、查詢、更新、刪除行程）
+- 🔍 自然語言理解日曆操作
+- ✅ 啟動自我檢測系統
+- 🚀 24/7 雲端運行在 Railway 平台
+- 🔮 **無極 AI Agents OS** - 五行元素協作系統
+- 🎯 **CRUZ AI 伴侶系統** - 數位分身開發夥伴
+- 🧠 用戶心理分析與個性化回應（TDD 開發）
+- 📝 開發對話自動記憶成長系統
 
 ## 專案結構
 
@@ -26,9 +30,15 @@ persona_cruz_ai/
 ├── gemini_service.py    # Gemini API 整合
 ├── calendar_service.py  # Google Calendar 整合
 ├── five_elements_agent.py# 無極 AI Agents OS 核心
+├── cruz_persona_system.py# CRUZ 人格語料系統
+├── user_analyzer.py     # 用戶心理分析器
+├── cruz_developer_mode.py# CRUZ 開發者模式
+├── conversation_memory_sync.py # 對話記憶同步
+├── cruz_ai_companion.py # CRUZ AI 伴侶主程式
 ├── jokes.py             # 笑話資料
 ├── startup_test.py      # 啟動自我檢測
-├── test_dashboard_only.py# Dashboard 測試工具
+├── tests/               # TDD 測試檔案
+├── data/cruz_corpus.json# CRUZ 語料庫
 ├── development_lessons.json # 開發教訓記錄
 ├── CLAUDE.md           # Claude Code 文件
 └── README.md           # 專案說明
@@ -82,6 +92,16 @@ persona_cruz_ai/
 
 無極會適時介入，提供指引和平衡建議。
 
+### CRUZ 開發夥伴
+
+**🎯 CRUZ** - 您的數位分身，協助開發決策
+
+特質：
+- 真誠直接，不說廢話
+- 鼓勵創造，相信潛能
+- 快速決策，相信直覺
+- 用戶至上，簡單優先
+
 ### 自動切換機制
 
 系統會根據對話內容自動切換適合的角色：
@@ -90,6 +110,7 @@ persona_cruz_ai/
 - 提到「架構」「設計」→ 土
 - 提到「優化」「效能」→ 金
 - 提到「測試」「錯誤」→ 水
+- 需要快速決策 → CRUZ
 
 ## 部署到 Railway
 
@@ -142,6 +163,44 @@ persona_cruz_ai/
 1. 所有設定都在 Railway 環境變數中管理
 2. 不需要本機 `.env` 檔案
 3. 自動從 GitHub 部署更新
+
+## 授權
+
+## CRUZ AI 伴侶系統
+
+### 本地開發模式
+
+運行 CRUZ AI 伴侶（您的數位分身開發夥伴）：
+
+```bash
+python cruz_ai_companion.py
+```
+
+### 功能特色
+
+1. **對話記憶成長**
+   - 自動記錄開發對話
+   - 提取重要洞察為語料
+   - 越用越了解您的風格
+
+2. **多角色切換**
+   - CRUZ：您的數位分身
+   - 五行角色：專業分工
+   - 無極：全局觀察
+
+3. **開發決策支援**
+   - 基於您的價值觀給建議
+   - 記錄重要決策理由
+   - 追蹤開發洞察
+
+### 指令說明
+
+- `/mode <角色>` - 切換角色
+- `/status` - 查看系統狀態
+- `/insights` - 查看開發洞察
+- `/save` - 保存對話
+- `/help` - 顯示幫助
+- `/quit` - 結束程式
 
 ## 授權
 

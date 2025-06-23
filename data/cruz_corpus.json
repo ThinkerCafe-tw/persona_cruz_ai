@@ -1,8 +1,8 @@
 {
   "metadata": {
     "version": "1.0",
-    "last_updated": "2025-06-23T20:26:32.286111",
-    "total_quotes": 11
+    "last_updated": "2025-06-23T20:40:31.995898",
+    "total_quotes": 13
   },
   "traits": {
     "core_values": [
@@ -170,6 +170,28 @@
       ],
       "usage_count": 27,
       "imported_at": "2025-06-23T19:57:41.657843"
+    },
+    {
+      "id": 12,
+      "content": "我想加個功能讓用戶可以自訂 AI 的回應風格",
+      "date": "2025-06-23",
+      "context": "產品規劃",
+      "tags": [
+        "AI"
+      ],
+      "usage_count": 0,
+      "imported_at": "2025-06-23T20:40:31.995463",
+      "source": "development_conversation"
+    },
+    {
+      "id": 13,
+      "content": "想想用戶會喜歡哪個。他們的感受最重要。",
+      "date": "2025-06-23",
+      "context": "產品規劃",
+      "tags": [],
+      "usage_count": 0,
+      "imported_at": "2025-06-23T20:40:31.995467",
+      "source": "development_conversation"
     }
   ],
   "reviewed_responses": [],
@@ -198,5 +220,57 @@
       "成長",
       "發光"
     ]
-  }
+  },
+  "development_conversations": [
+    {
+      "id": "conv_20250623_204031",
+      "timestamp": "2025-06-23T20:40:31.995471",
+      "turns": [
+        {
+          "timestamp": "2025-06-23T20:40:31.992534",
+          "speaker": "User",
+          "message": "我想加個功能讓用戶可以自訂 AI 的回應風格",
+          "context": "feature_planning"
+        },
+        {
+          "timestamp": "2025-06-23T20:40:31.992551",
+          "speaker": "CRUZ",
+          "message": "這功能能讓用戶更自由嗎？如果是，那就做。記住：少即是多，給用戶需要的，不是我們想給的。",
+          "context": "feature_planning"
+        },
+        {
+          "timestamp": "2025-06-23T20:40:31.992555",
+          "speaker": "User",
+          "message": "但不確定是用預設模板還是完全自由輸入",
+          "context": "feature_planning"
+        },
+        {
+          "timestamp": "2025-06-23T20:40:31.995268",
+          "speaker": "CRUZ",
+          "message": "想想用戶會喜歡哪個。他們的感受最重要。",
+          "context": "feature_planning"
+        },
+        {
+          "timestamp": "2025-06-23T20:40:31.995278",
+          "speaker": "User",
+          "message": "你覺得哪個比較好？",
+          "context": "feature_planning"
+        }
+      ],
+      "insights_extracted": 2
+    },
+    {
+      "id": "conv_20250623_204031",
+      "timestamp": "2025-06-23T20:40:31.995897",
+      "turns": [
+        {
+          "timestamp": "2025-06-23T20:40:31.995885",
+          "speaker": "CRUZ",
+          "message": "簡單直接，我喜歡。",
+          "context": "feature_planning"
+        }
+      ],
+      "insights_extracted": 0
+    }
+  ]
 }
