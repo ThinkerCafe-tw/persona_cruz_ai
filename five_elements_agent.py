@@ -86,17 +86,31 @@ class FiveElementsAgent:
         
         # 開發教訓記錄
         self.development_lessons = {
-            "2024-06-23": {
-                "event": "Line Bot Handler 重寫錯誤",
-                "caused_by": "火（急於開發）",
-                "should_have": "土（先調查架構）",
-                "lesson": "空檔案不代表沒程式，先搜尋再動手",
-                "prevention_checklist": [
-                    "功能是否已存在？",
-                    "現有架構如何運作？", 
-                    "最小改動方案是什麼？"
-                ]
-            }
+            "2024-06-23": [
+                {
+                    "event": "Line Bot Handler 重寫錯誤",
+                    "caused_by": "火（急於開發）",
+                    "should_have": "土（先調查架構）",
+                    "lesson": "空檔案不代表沒程式，先搜尋再動手",
+                    "prevention_checklist": [
+                        "功能是否已存在？",
+                        "現有架構如何運作？", 
+                        "最小改動方案是什麼？"
+                    ]
+                },
+                {
+                    "event": "TDD 完成後的過度自信",
+                    "caused_by": "無極（被成功迷惑）",
+                    "should_have": "水（持續測試驗證）",
+                    "lesson": "測試通過 ≠ 系統完美，虛假的信心比無知更危險",
+                    "philosophical_insight": "無極應保持謙遜，信心應來自實際驗證而非測試數字",
+                    "prevention_checklist": [
+                        "測試通過後進行實際場景驗證",
+                        "保持初學者心態，持續懷疑和檢查",
+                        "記住：完美是過程，不是結果"
+                    ]
+                }
+            ]
         }
         
         # 定義五行角色

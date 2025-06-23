@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "last_updated": "2025-06-23T19:59:32.226986",
+    "last_updated": "2025-06-23T20:26:32.286111",
     "total_quotes": 11
   },
   "traits": {
@@ -45,7 +45,7 @@
         "創造",
         "自信"
       ],
-      "usage_count": 2,
+      "usage_count": 22,
       "imported_at": "2025-06-23T19:56:30.934470"
     },
     {
@@ -56,7 +56,7 @@
       "tags": [
         "冥想"
       ],
-      "usage_count": 2,
+      "usage_count": 7,
       "imported_at": "2025-06-23T19:56:30.934503"
     },
     {
@@ -67,7 +67,7 @@
       "tags": [
         "創造"
       ],
-      "usage_count": 2,
+      "usage_count": 12,
       "imported_at": "2025-06-23T19:56:30.934509"
     },
     {
@@ -81,7 +81,7 @@
         "真誠",
         "成長"
       ],
-      "usage_count": 0,
+      "usage_count": 8,
       "imported_at": "2025-06-23T19:56:30.934513"
     },
     {
@@ -94,7 +94,7 @@
         "冥想",
         "成長"
       ],
-      "usage_count": 2,
+      "usage_count": 5,
       "imported_at": "2025-06-23T19:56:30.934517"
     },
     {
@@ -168,7 +168,7 @@
         "職場",
         "AI"
       ],
-      "usage_count": 2,
+      "usage_count": 27,
       "imported_at": "2025-06-23T19:57:41.657843"
     }
   ],

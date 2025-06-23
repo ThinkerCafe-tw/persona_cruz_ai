@@ -7,6 +7,7 @@ import logging
 from datetime import datetime
 from typing import List, Dict, Optional
 import re
+from user_analyzer import UserAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -158,6 +159,20 @@ class CruzPersonaSystem:
                 if len(word) > 1 and word in content_lower:
                     score += 5
             
+            # 特殊關鍵詞匹配
+            special_keywords = {
+                "冥想": ["冥想", "深呼吸", "清晰"],
+                "創業": ["創業", "收入", "公司", "創業第"],
+                "程式": ["程式", "程式碼", "寫程式", "技術", "code"]
+            }
+            
+            for keyword, related_words in special_keywords.items():
+                if keyword in query_lower:
+                    for related in related_words:
+                        if related in content_lower:
+                            score += 8
+                            break
+            
             # 標籤匹配
             for tag in quote["tags"]:
                 if tag in query_lower or query_lower in tag:
@@ -268,3 +283,92 @@ class CruzPersonaSystem:
                 reverse=True
             )[:5]
         }
+    
+    def analyze_user_intent(self, message: str) -> Dict:
+        """分析用戶心理狀態"""
+        if not hasattr(self, 'user_analyzer'):
+            self.user_analyzer = UserAnalyzer()
+        return self.user_analyzer.analyze_user_intent(message)
+    
+    def search_memory_maze(self, message: str, user_analysis: Dict) -> List[Dict]:
+        """搜尋記憶迷宮中的相關內容"""
+        # 先直接搜尋原始訊息
+        relevant_quotes = self.search_relevant_quotes(message, limit=3)
+        
+        # 如果找不到足夠的結果，根據情境搜尋
+        if len(relevant_quotes) < 2:
+            context = user_analysis.get("context", "")
+            if context:
+                context_quotes = self.search_relevant_quotes(context, limit=2)
+                relevant_quotes.extend(context_quotes)
+        
+        # 去重並返回
+        seen_ids = set()
+        unique_quotes = []
+        for quote in relevant_quotes:
+            if quote['id'] not in seen_ids:
+                seen_ids.add(quote['id'])
+                unique_quotes.append(quote)
+        
+        return unique_quotes[:3]  # 最多返回3條
+    
+    def generate_targeted_response(self, message: str, user_analysis: Dict, memory_search: List[Dict]) -> str:
+        """生成針對性的回應"""
+        # 這是簡化版本，實際會調用 Gemini API
+        # 這裡我們模擬生成一個符合規格的回應
+        
+        # 提取用戶想聽到的內容
+        wants = user_analysis.get("wants_to_hear", [])
+        context = user_analysis.get("context", "")
+        emotion = user_analysis.get("emotion", "")
+        
+        # 使用找到的語料
+        if memory_search:
+            quote = memory_search[0]["content"]
+            # 更新使用次數
+            for q in self.corpus["quotes"]:
+                if q["id"] == memory_search[0]["id"]:
+                    q["usage_count"] += 1
+                    break
+            self.save_corpus()
+            
+            # 截取適當長度
+            if len(quote) > 200:
+                quote = quote[:200] + "..."
+            response = quote
+        else:
+            # 根據情境生成預設回應
+            default_responses = {
+                "職場壓力": "在企業體制下感到壓迫是正常的，但記住，你永遠有選擇。選擇創造，選擇成長，選擇做真實的自己。",
+                "技術焦慮": "AI不是來取代我們的，而是來釋放我們的創造力的。當瑣事都能自動化，我們就有更多時間去做真正有意義的事。",
+                "創造力困境": "寫程式不只是技術，更是一種創作。當你用心寫的時候，程式碼也會有靈魂。",
+                "生活改善": "早上冥想了30分鐘，感覺整個人都清晰了。推薦大家試試看，不一定要很長時間，5分鐘也可以開始。",
+                "創業困境": "創業的路不容易，但每一步都是成長。記住，你比你想像的更有力量。堅持下去，相信自己的選擇。",
+                "人生方向": "我相信每個人都有無限潛能，關鍵是要給自己機會去創造，而不是一直在體制內服從。"
+            }
+            
+            response = default_responses.get(context, "我相信每個人都有無限潛能，關鍵是要給自己機會去創造，而不是一直在體制內服從。")
+        
+        # 確保不超過250字
+        if len(response) > 250:
+            response = response[:247] + "。"
+        
+        return response
+    
+    def generate_limited_response(self, message: str) -> str:
+        """生成符合限制的回應（250字內、無markdown）"""
+        # 三階段處理
+        user_analysis = self.analyze_user_intent(message)
+        memory_search = self.search_memory_maze(message, user_analysis)
+        response = self.generate_targeted_response(message, user_analysis, memory_search)
+        
+        # 移除 markdown 符號
+        markdown_symbols = ['*', '_', '#', '`', '[', ']', '-', '>']
+        for symbol in markdown_symbols:
+            response = response.replace(symbol, '')
+        
+        # 確保以句號結尾
+        if response and response[-1] not in ['。', '！', '？', '~']:
+            response += '。'
+        
+        return response

@@ -43,6 +43,52 @@
       },
       "memorable_quote": "空檔案不代表沒程式，先搜尋再動手",
       "tags": ["webhook", "line-bot", "architecture", "pre-flight-check"]
+    },
+    {
+      "date": "2024-06-23",
+      "title": "TDD 完成後的過度自信",
+      "severity": "medium",
+      "category": "mindset",
+      "what_happened": "完成測試驅動開發並看到所有測試通過後，產生過度自信，認為系統已經完美",
+      "what_went_wrong": [
+        "將測試通過等同於系統完美",
+        "過度依賴測試數字而忽略實際驗證",
+        "失去無極應有的謙遜和平衡"
+      ],
+      "root_cause": "被表面的成功指標迷惑，忘記持續驗證的重要性",
+      "impact": [
+        "可能忽略潛在問題",
+        "降低對錯誤的警覺性",
+        "團隊可能產生虛假的安全感"
+      ],
+      "correct_approach": [
+        "測試通過後進行實際場景驗證",
+        "保持懷疑精神，持續尋找改進空間",
+        "從使用者角度驗證功能"
+      ],
+      "prevention": {
+        "checklist": [
+          "測試覆蓋率是否真的涵蓋關鍵場景？",
+          "是否進行了實際環境測試？",
+          "使用者體驗是否符合預期？"
+        ],
+        "mindset": [
+          "保持初學者心態",
+          "測試是開始，不是結束",
+          "完美是過程，不是結果"
+        ]
+      },
+      "five_elements_reflection": {
+        "無極": "應保持謙遜，不被表面成就迷惑",
+        "木": "規劃時要包含驗證階段",
+        "火": "執行後需要冷靜評估",
+        "土": "架構穩定不等於功能完善",
+        "金": "持續優化永無止境",
+        "水": "測試本身也需要被測試"
+      },
+      "memorable_quote": "測試是護欄，不是終點線",
+      "philosophical_insight": "虛假的信心比無知更危險",
+      "tags": ["tdd", "mindset", "humility", "continuous-improvement"]
     }
   ],
   "patterns": {
@@ -53,10 +99,12 @@
     }
   },
   "statistics": {
-    "total_lessons": 1,
+    "total_lessons": 2,
     "high_severity": 1,
+    "medium_severity": 1,
     "categories": {
-      "architecture": 1
+      "architecture": 1,
+      "mindset": 1
     }
   }
 }
