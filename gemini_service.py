@@ -3,7 +3,9 @@ from config import Config
 import logging
 import json
 from datetime import datetime, timedelta
+from typing import Optional
 from calendar_service import CalendarService
+from five_elements_agent import FiveElementsAgent
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +38,10 @@ class GeminiService:
         except Exception as e:
             logger.warning(f"Calendar service initialization failed: {str(e)}")
             self.calendar_service = None
+        
+        # 初始化五行系統
+        self.five_elements = FiveElementsAgent()
+        self.element_mode = False  # 是否啟用五行模式
         
     def _get_calendar_tools(self):
         """定義日曆相關的工具函數"""
@@ -124,6 +130,14 @@ class GeminiService:
             # 初始化 final_response
             final_response = None
             
+            # 檢查是否是五行系統指令
+            if message.strip() in ["/dashboard", "/狀態", "/儀表板"]:
+                return self.five_elements.get_dashboard()
+            elif message.strip() in ["/status", "/mini", "/簡報"]:
+                return self.five_elements.get_mini_dashboard()
+            elif message.strip() in ["/harmony", "/和諧度"]:
+                return self.five_elements.get_harmony_status()
+            
             # 如果是簡單的日曆請求且 calendar_service 不可用，直接回應
             if self.calendar_service is None and any(keyword in message for keyword in ['行程', '安排', '會議', '約會']):
                 return "抱歉，日曆功能目前無法使用。請確認日曆服務已正確設定。"
@@ -134,11 +148,18 @@ class GeminiService:
             # 建立對話上下文
             context = self._build_context(user_id, message)
             
+            # 記錄開始時間
+            start_time = datetime.now()
+            
+            # 判斷當前使用的元素（如果有的話）
+            current_element = self.five_elements.current_role.element if self.five_elements.current_role else "火"
+            
             # 呼叫 Gemini API with Function Calling
             logger.info(f"=== Calling Gemini API ===")
             logger.info(f"User ID: {user_id}")
             logger.info(f"Message: {message}")
             logger.info(f"Context length: {len(context)} chars")
+            logger.info(f"Current Element: {current_element}")
             
             response = self.model.generate_content(context)
             logger.info(f"✅ Gemini API response received")
@@ -206,9 +227,18 @@ class GeminiService:
             # 儲存對話歷史
             self._save_conversation(user_id, message, final_response)
             
+            # 計算響應時間並更新指標
+            response_time = (datetime.now() - start_time).total_seconds()
+            self.five_elements.update_metrics(current_element, success=True, response_time=response_time)
+            
+            # 如果有角色切換，記錄流程
+            if self.five_elements.current_role:
+                self.five_elements.record_flow("用戶", current_element, "對話")
+            
             logger.info(f"=== Returning final response ===")
             logger.info(f"Response length: {len(final_response)}")
             logger.info(f"Response preview: {final_response[:200]}...")
+            logger.info(f"Response time: {response_time:.2f}s")
             
             return final_response
             
@@ -217,6 +247,12 @@ class GeminiService:
             logger.error(f"Error type: {type(e).__name__}")
             import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
+            
+            # 更新錯誤指標
+            if hasattr(self, 'five_elements'):
+                current_element = self.five_elements.current_role.element if self.five_elements.current_role else "火"
+                response_time = (datetime.now() - start_time).total_seconds() if 'start_time' in locals() else 0
+                self.five_elements.update_metrics(current_element, success=False, response_time=response_time)
             
             # 如果是日曆相關錯誤，提供更具體的訊息
             if "calendar" in str(e).lower():
@@ -395,8 +431,16 @@ class GeminiService:
     
     def _build_context(self, user_id: str, message: str) -> str:
         """建立包含對話歷史的上下文"""
-        # 系統提示詞
-        system_prompt = """你是一個友善的 AI 助理，請用繁體中文回答。
+        
+        # 檢查是否需要切換角色或使用五行系統
+        element_context = self._check_element_trigger(message)
+        
+        # 根據是否啟用五行模式選擇不同的系統提示詞
+        if element_context:
+            system_prompt = element_context
+        else:
+            # 原本的系統提示詞
+            system_prompt = """你是一個友善的 AI 助理，請用繁體中文回答。
 請保持回答簡潔清楚，並且親切有禮。
 如果使用者詢問你的身份，請告訴他們你是 Persona Cruz AI 助理。
 
@@ -440,3 +484,49 @@ class GeminiService:
         """清除特定使用者的對話歷史"""
         if user_id in self.conversation_history:
             del self.conversation_history[user_id]
+    
+    def _check_element_trigger(self, message: str) -> Optional[str]:
+        """檢查是否需要啟動五行系統"""
+        message_lower = message.lower()
+        
+        # 特定觸發詞
+        element_triggers = {
+            "五行": "分析",
+            "卡住": "無極",
+            "debug": "分析",
+            "測試": "水",
+            "開發": "火",
+            "架構": "土",
+            "優化": "金",
+            "需求": "木"
+        }
+        
+        # 檢查是否有觸發詞
+        for trigger, suggested_element in element_triggers.items():
+            if trigger in message_lower:
+                if suggested_element == "分析":
+                    # 讓無極分析適合的角色
+                    analysis = self.five_elements.analyze_situation(message)
+                    suggested_element = analysis["suggested_element"]
+                
+                # 切換角色並返回角色提示詞
+                self.five_elements.switch_role(suggested_element)
+                return self.five_elements.get_role_prompt(suggested_element)
+        
+        # 檢查是否明確要求某個角色
+        role_requests = {
+            "火": ["開發專員", "快速實作", "寫程式"],
+            "水": ["測試專員", "找bug", "檢查"],
+            "木": ["產品經理", "規劃", "功能設計"],
+            "土": ["架構師", "系統設計", "穩定性"],
+            "金": ["優化專員", "重構", "效能"],
+            "無極": ["觀察", "分析情況", "系統狀態"]
+        }
+        
+        for element, keywords in role_requests.items():
+            for keyword in keywords:
+                if keyword in message_lower:
+                    self.five_elements.switch_role(element)
+                    return self.five_elements.get_role_prompt(element)
+        
+        return None

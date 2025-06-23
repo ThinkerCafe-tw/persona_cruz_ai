@@ -1,10 +1,17 @@
+"""
+Line Bot 訊息處理器
+"""
+import logging
 from linebot import LineBotApi, WebhookHandler
-from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.exceptions import LineBotApiError
+from linebot.models import (
+    MessageEvent, TextMessage, TextSendMessage,
+    QuickReply, QuickReplyButton, MessageAction
+)
 from config import Config
 from gemini_service import GeminiService
 from jokes import get_random_joke
-import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -16,122 +23,120 @@ class LineBotHandler:
         self.gemini_service = GeminiService()
         
         # 註冊訊息處理器
-        self._register_handlers()
-    
-    def _register_handlers(self):
-        """註冊各種訊息類型的處理器"""
-        @self.handler.add(MessageEvent, message=TextMessage)
-        def handle_text_message(event):
-            """處理文字訊息"""
-            user_id = event.source.user_id
-            user_message = event.message.text
-            
-            logger.info(f"Received message from {user_id}: {user_message}")
-            
-            # 特殊指令處理
-            if user_message.lower() in ['/clear', '清除對話']:
-                self.gemini_service.clear_history(user_id)
-                reply_text = "對話記錄已清除！我們可以開始新的對話了。"
-            elif user_message.lower() in ['/help', '幫助']:
-                reply_text = self._get_help_message()
-            elif user_message in ['說個笑話', '講個笑話', '來個笑話']:
-                reply_text = get_random_joke()
-            elif user_message.lower() == '/test':
-                reply_text = self._run_self_test()
-            else:
-                # 取得 Gemini AI 回應
-                logger.info(f"Getting Gemini response for message: {user_message[:50]}...")
-                reply_text = self.gemini_service.get_response(user_id, user_message)
-                logger.info(f"Gemini response received: {reply_text[:100]}...")
-            
-            # 回覆訊息
-            try:
-                logger.info(f"=== Preparing to send Line reply ===")
-                logger.info(f"Reply token: {event.reply_token}")
-                logger.info(f"Reply text length: {len(reply_text)}")
-                logger.info(f"Reply text preview: {reply_text[:200]}...")
-                
-                # 建立訊息物件
-                text_message = TextSendMessage(text=reply_text)
-                logger.info(f"TextSendMessage created: {type(text_message)}")
-                
-                # 發送回覆
-                self.line_bot_api.reply_message(
-                    event.reply_token,
-                    text_message
-                )
-                logger.info("✅ Reply sent successfully to Line")
-            except Exception as e:
-                logger.error(f"❌ Failed to send Line reply: {str(e)}")
-                logger.error(f"Error type: {type(e).__name__}")
-                import traceback
-                logger.error(f"Traceback: {traceback.format_exc()}")
-    
-    def _get_help_message(self):
-        """取得幫助訊息"""
-        return """🤖 Persona Cruz AI 助理使用說明：
-
-我是您的 AI 助理，可以回答各種問題並與您對話。
-
-📅 日曆功能：
-• 建立行程：「幫我安排明天下午3點開會」
-• 查詢行程：「我明天有什麼行程？」
-• 管理行程：自然語言描述即可
-
-💬 對話功能：
-• /help 或 幫助 - 顯示此說明
-• /clear 或 清除對話 - 清除對話記錄
-• 說個笑話 - 聽個冷笑話放鬆一下
-
-有任何問題都可以直接問我喔！"""
-    
-    def _run_self_test(self):
-        """執行自我測試"""
-        test_results = []
+        self.handler.add(MessageEvent, message=TextMessage)(self.handle_text_message)
         
-        # 測試基本對話
-        try:
-            response = self.gemini_service.get_response("test_user", "你好")
-            test_results.append("✅ 基本對話: 通過" if response else "❌ 基本對話: 失敗")
-        except:
-            test_results.append("❌ 基本對話: 錯誤")
-        
-        # 測試笑話功能
-        try:
-            from jokes import get_random_joke
-            joke = get_random_joke()
-            test_results.append("✅ 笑話功能: 通過" if joke else "❌ 笑話功能: 失敗")
-        except:
-            test_results.append("❌ 笑話功能: 錯誤")
-        
-        # 測試日曆功能
-        try:
-            if self.gemini_service.calendar_service:
-                test_results.append("✅ 日曆服務: 已啟用")
-            else:
-                test_results.append("⚠️ 日曆服務: 未設定")
-        except:
-            test_results.append("❌ 日曆服務: 錯誤")
-        
-        # 建立測試報告
-        from datetime import datetime
-        report = "🧪 自我測試報告\n" + "="*20 + "\n"
-        report += "\n".join(test_results)
-        report += "\n" + "="*20 + "\n"
-        report += f"測試時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        
-        return report
+        logger.info("LineBotHandler initialized successfully")
     
     def handle_webhook(self, body, signature):
         """處理 webhook 請求"""
+        self.handler.handle(body, signature)
+    
+    def handle_text_message(self, event):
+        """處理文字訊息"""
+        user_id = event.source.user_id
+        message_text = event.message.text.strip()
+        
+        logger.info(f"Received message from {user_id}: {message_text}")
+        
         try:
-            self.handler.handle(body, signature)
-        except InvalidSignatureError as e:
-            logger.error(f"Invalid signature error: {str(e)}")
-            logger.error(f"Received signature: {signature}")
-            logger.error(f"Body: {body[:100]}...")  # 只顯示前100個字符
-            raise
+            # 處理特殊命令
+            if message_text in ['/help', '幫助']:
+                reply_text = self._get_help_message()
+            elif message_text in ['/clear', '清除對話']:
+                self.gemini_service.clear_history(user_id)
+                reply_text = "已清除對話記錄！讓我們重新開始吧。"
+            elif message_text == '/test':
+                reply_text = self._run_self_test()
+            elif message_text in ['說個笑話', '講個笑話', '來個笑話']:
+                reply_text = get_random_joke()
+            # 五行系統指令
+            elif message_text in ['/dashboard', '/狀態', '/儀表板']:
+                reply_text = self.gemini_service.get_response(user_id, message_text)
+            elif message_text in ['/status', '/mini', '/簡報']:
+                reply_text = self.gemini_service.get_response(user_id, message_text)
+            elif message_text in ['/harmony', '/和諧度']:
+                reply_text = self.gemini_service.get_response(user_id, message_text)
+            else:
+                # 一般對話，交給 Gemini 處理
+                reply_text = self.gemini_service.get_response(user_id, message_text)
+            
+            # 發送回覆
+            self._send_reply(event.reply_token, reply_text)
+            
         except Exception as e:
-            logger.error(f"Error handling webhook: {str(e)}")
-            logger.error(f"Error type: {type(e).__name__}")
-            raise
+            logger.error(f"Error handling message: {str(e)}")
+            error_message = "抱歉，處理您的訊息時發生錯誤。請稍後再試。"
+            self._send_reply(event.reply_token, error_message)
+    
+    def _send_reply(self, reply_token, message_text):
+        """發送回覆訊息"""
+        try:
+            # 檢查訊息長度
+            if len(message_text) > 5000:
+                message_text = message_text[:4997] + "..."
+            
+            self.line_bot_api.reply_message(
+                reply_token,
+                TextSendMessage(text=message_text)
+            )
+        except LineBotApiError as e:
+            logger.error(f"Failed to send reply: {e}")
+    
+    def _get_help_message(self):
+        """取得說明訊息"""
+        return """🤖 Persona Cruz AI 助理使用說明
+
+【基本功能】
+• 智能對話：直接輸入訊息即可對話
+• 日曆管理：「幫我安排明天下午3點開會」
+• 查詢行程：「我明天有什麼行程？」
+• 說個笑話：輕鬆一下！
+
+【五行系統】
+• /dashboard - 查看完整系統儀表板
+• /status - 查看簡易系統狀態
+• /harmony - 查看五行和諧度
+• 說「開發」- 切換到火屬性開發專員
+• 說「測試」- 切換到水屬性測試專員
+• 說「卡住了」- 召喚無極觀察者
+
+【系統指令】
+• /help 或 幫助 - 顯示此說明
+• /clear 或 清除對話 - 清除對話記錄
+• /test - 執行系統自我測試
+
+有任何問題都可以直接問我！"""
+    
+    def _run_self_test(self):
+        """執行自我測試"""
+        results = []
+        
+        # 測試 1: Line Bot API
+        try:
+            self.line_bot_api.get_bot_info()
+            results.append("✅ Line Bot API 連線正常")
+        except:
+            results.append("❌ Line Bot API 連線失敗")
+        
+        # 測試 2: Gemini Service
+        try:
+            test_response = self.gemini_service.get_response("test_user", "測試訊息")
+            if test_response:
+                results.append("✅ Gemini AI 服務正常")
+            else:
+                results.append("⚠️ Gemini AI 回應為空")
+        except:
+            results.append("❌ Gemini AI 服務異常")
+        
+        # 測試 3: 五行系統
+        try:
+            dashboard = self.gemini_service.five_elements.get_mini_dashboard()
+            if dashboard:
+                results.append("✅ 五行系統運作正常")
+                results.append(f"   {dashboard}")
+            else:
+                results.append("⚠️ 五行系統無回應")
+        except:
+            results.append("❌ 五行系統異常")
+        
+        return "🔧 系統自我測試結果：\n\n" + "\n".join(results)
