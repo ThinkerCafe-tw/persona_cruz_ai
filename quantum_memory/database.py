@@ -20,7 +20,9 @@ class QuantumDatabase:
     """量子記憶資料庫管理器"""
     
     def __init__(self, database_url: Optional[str] = None):
-        self.database_url = database_url or os.getenv('DATABASE_URL')
+        # 優先使用已轉換的 Config.DATABASE_URL
+        from config import Config
+        self.database_url = database_url or Config.DATABASE_URL
         self.pool = None
         
         if not self.database_url:
@@ -28,9 +30,6 @@ class QuantumDatabase:
         
         if self.database_url:
             try:
-                # Railway 提供的 DATABASE_URL 可能需要調整
-                if self.database_url.startswith('postgres://'):
-                    self.database_url = self.database_url.replace('postgres://', 'postgresql://')
                 
                 # 建立連接池
                 self.pool = SimpleConnectionPool(

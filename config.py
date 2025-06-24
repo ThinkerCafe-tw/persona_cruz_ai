@@ -25,6 +25,9 @@ class Config:
     
     # 資料庫設定 (pgvector)
     DATABASE_URL = os.getenv('DATABASE_URL')
+    # Railway 使用 postgres:// 需要轉換為 postgresql://
+    if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://')
     USE_QUANTUM_DATABASE = bool(DATABASE_URL)  # 自動偵測是否使用資料庫
     
     @classmethod

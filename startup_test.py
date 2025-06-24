@@ -511,11 +511,14 @@ class StartupTest:
         print(f"\n🗄️  測試 {test_name}...")
         
         try:
-            database_url = os.getenv('DATABASE_URL')
+            # 從 config 取得已轉換的 DATABASE_URL
+            from config import Config
+            database_url = Config.DATABASE_URL
+            
             # 偵錯：印出 DATABASE_URL 資訊
             if database_url:
                 print(f"📍 DATABASE_URL 已設定: {database_url[:30]}...")
-                print(f"   開頭為: {'postgresql://' if database_url.startswith('postgresql://') else database_url.split('://')[0] + '://' if '://' in database_url else '未知格式'}")
+                print(f"   格式: {'✅ postgresql://' if database_url.startswith('postgresql://') else '❌ ' + (database_url.split('://')[0] + '://' if '://' in database_url else '未知格式')}")
             else:
                 print("❌ DATABASE_URL 環境變數不存在！")
             
@@ -526,11 +529,7 @@ class StartupTest:
                 print("❌ 請參考 RAILWAY_PGVECTOR_SETUP.md 設定 pgvector")
                 return
             
-            # Railway 提供的 DATABASE_URL 可能需要調整
-            if database_url.startswith('postgres://'):
-                database_url = database_url.replace('postgres://', 'postgresql://')
-            
-            # 測試連接
+            # 測試連接 (URL 已在 config.py 轉換)
             conn = psycopg2.connect(database_url)
             conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             cur = conn.cursor()
