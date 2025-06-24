@@ -111,6 +111,21 @@ def health_check():
     
     return health_status
 
+@app.route("/debug-env", methods=['GET'])
+def debug_env():
+    """偵錯環境變數（部署後請刪除）"""
+    import os
+    db_url = os.getenv('DATABASE_URL', 'NOT_SET')
+    return {
+        'DATABASE_URL_exists': db_url != 'NOT_SET',
+        'DATABASE_URL_prefix': db_url[:30] + '...' if db_url != 'NOT_SET' else 'NOT_SET',
+        'DATABASE_URL_format': 'postgresql://' if db_url.startswith('postgresql://') else 
+                               'postgres://' if db_url.startswith('postgres://') else 
+                               'unknown' if db_url != 'NOT_SET' else 'NOT_SET',
+        'RAILWAY_ENVIRONMENT': os.getenv('RAILWAY_ENVIRONMENT', 'NOT_SET'),
+        'env_vars_count': len([k for k in os.environ.keys() if not k.startswith('_')])
+    }
+
 @app.route("/test", methods=['GET', 'POST'])
 def test_endpoint():
     """測試端點"""

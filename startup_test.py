@@ -512,6 +512,13 @@ class StartupTest:
         
         try:
             database_url = os.getenv('DATABASE_URL')
+            # 偵錯：印出 DATABASE_URL 資訊
+            if database_url:
+                print(f"📍 DATABASE_URL 已設定: {database_url[:30]}...")
+                print(f"   開頭為: {'postgresql://' if database_url.startswith('postgresql://') else database_url.split('://')[0] + '://' if '://' in database_url else '未知格式'}")
+            else:
+                print("❌ DATABASE_URL 環境變數不存在！")
+            
             if not database_url:
                 self.results[test_name] = "❌ 失敗"
                 self.critical_failures.append("未設定 DATABASE_URL - 量子記憶系統需要 pgvector")
