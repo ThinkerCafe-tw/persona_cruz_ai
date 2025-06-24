@@ -8,6 +8,8 @@ from linebot import LineBotApi
 from linebot.exceptions import LineBotApiError
 import json
 import subprocess
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 logger = logging.getLogger(__name__)
 
@@ -423,6 +425,7 @@ class StartupTest:
         
         # 執行各項測試
         self._test_environment_variables()
+        self._test_pgvector_database()  # 新增 pgvector 測試
         self._test_gemini_connection()
         self._test_line_bot_credentials()
         self._test_google_calendar()
@@ -445,7 +448,8 @@ class StartupTest:
             required_vars = {
                 'LINE_CHANNEL_ACCESS_TOKEN': os.getenv('LINE_CHANNEL_ACCESS_TOKEN'),
                 'LINE_CHANNEL_SECRET': os.getenv('LINE_CHANNEL_SECRET'),
-                'GEMINI_API_KEY': os.getenv('GEMINI_API_KEY')
+                'GEMINI_API_KEY': os.getenv('GEMINI_API_KEY'),
+                'DATABASE_URL': os.getenv('DATABASE_URL')  # 新增必要的資料庫連接
             }
             
             missing_vars = [var for var, value in required_vars.items() if not value]
@@ -500,6 +504,97 @@ class StartupTest:
         except Exception as e:
             self.results[test_name] = "❌ 失敗"
             self.critical_failures.append(f"Gemini 連線錯誤: {str(e)}")
+    
+    def _test_pgvector_database(self):
+        """測試 pgvector 資料庫連接"""
+        test_name = "pgvector 資料庫"
+        print(f"\n🗄️  測試 {test_name}...")
+        
+        try:
+            database_url = os.getenv('DATABASE_URL')
+            if not database_url:
+                self.results[test_name] = "❌ 失敗"
+                self.critical_failures.append("未設定 DATABASE_URL - 量子記憶系統需要 pgvector")
+                self.test_agent.remember_test(test_name, False, 0, "DATABASE_URL missing")
+                print("❌ 請參考 RAILWAY_PGVECTOR_SETUP.md 設定 pgvector")
+                return
+            
+            # Railway 提供的 DATABASE_URL 可能需要調整
+            if database_url.startswith('postgres://'):
+                database_url = database_url.replace('postgres://', 'postgresql://')
+            
+            # 測試連接
+            conn = psycopg2.connect(database_url)
+            conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+            cur = conn.cursor()
+            
+            # 檢查 PostgreSQL 版本
+            cur.execute("SELECT version()")
+            pg_version = cur.fetchone()[0]
+            logger.info(f"PostgreSQL: {pg_version.split(',')[0]}")
+            
+            # 檢查 pgvector 擴展
+            cur.execute("""
+                SELECT extname, extversion 
+                FROM pg_extension 
+                WHERE extname = 'vector'
+            """)
+            pgvector_result = cur.fetchone()
+            
+            if not pgvector_result:
+                # 嘗試建立 pgvector 擴展
+                try:
+                    cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
+                    cur.execute("SELECT extversion FROM pg_extension WHERE extname = 'vector'")
+                    pgvector_result = cur.fetchone()
+                    if pgvector_result:
+                        logger.info(f"✅ pgvector 擴展已自動安裝: v{pgvector_result[0]}")
+                    else:
+                        raise Exception("無法安裝 pgvector 擴展")
+                except Exception as e:
+                    self.results[test_name] = "❌ 失敗"
+                    self.critical_failures.append(f"pgvector 擴展未安裝: {str(e)}")
+                    self.test_agent.remember_test(test_name, False, time.time() - self.start_time, str(e))
+                    print("❌ 請手動執行: CREATE EXTENSION vector;")
+                    cur.close()
+                    conn.close()
+                    return
+            
+            # 檢查量子記憶表是否存在
+            cur.execute("""
+                SELECT COUNT(*) FROM information_schema.tables 
+                WHERE table_name IN ('quantum_memories', 'memory_crystals', 'quantum_ripples')
+            """)
+            table_count = cur.fetchone()[0]
+            
+            if table_count < 3:
+                logger.warning(f"量子記憶表尚未完全建立 ({table_count}/3)")
+                # 表會在第一次使用時自動建立，這不是嚴重錯誤
+            
+            self.results[test_name] = "✅ 通過"
+            self.test_agent.remember_test(test_name, True, time.time() - self.start_time)
+            logger.info(f"✅ pgvector v{pgvector_result[0] if pgvector_result else 'new'} 就緒")
+            
+            cur.close()
+            conn.close()
+            
+        except psycopg2.OperationalError as e:
+            self.results[test_name] = "❌ 失敗"
+            error_msg = f"無法連接到資料庫: {str(e)}"
+            self.critical_failures.append(error_msg)
+            self.test_agent.remember_test(test_name, False, time.time() - self.start_time, error_msg)
+            print(f"❌ {error_msg}")
+            print("💡 請確認：")
+            print("   1. PostgreSQL 服務是否運作中")
+            print("   2. DATABASE_URL 是否正確")
+            print("   3. 網路連接是否正常")
+            
+        except Exception as e:
+            self.results[test_name] = "❌ 失敗"
+            error_msg = f"pgvector 測試錯誤: {str(e)}"
+            self.critical_failures.append(error_msg)
+            self.test_agent.remember_test(test_name, False, time.time() - self.start_time, error_msg)
+            logger.error(error_msg, exc_info=True)
     
     def _test_line_bot_credentials(self):
         """測試 Line Bot 憑證"""

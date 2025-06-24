@@ -22,11 +22,12 @@ logger = logging.getLogger(__name__)
 class QuantumMemoryBridge:
     """橋接現有記憶系統與量子記憶"""
     
-    def __init__(self):
+    def __init__(self, use_database: bool = True):
         self.quantum_memories: Dict[str, QuantumMemory] = {}
         self.evolution_engine = QuantumEvolutionEngine()
         self.sync_queue = deque()
         self.evolution_threshold = 0.3  # 觸發演化的最小共振值
+        self.use_database = use_database
         
         # 初始化所有角色的量子記憶
         self._initialize_personas()
@@ -47,7 +48,7 @@ class QuantumMemoryBridge:
         ]
         
         for persona_id, name, essence in personas:
-            memory = QuantumMemory(persona_id)
+            memory = QuantumMemory(persona_id, use_database=self.use_database)
             memory.identity.essence = essence
             
             # 設定初始量子態

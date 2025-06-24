@@ -23,6 +23,10 @@ class Config:
     # Gemini 模型設定
     GEMINI_MODEL = 'gemini-pro'
     
+    # 資料庫設定 (pgvector)
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    USE_QUANTUM_DATABASE = bool(DATABASE_URL)  # 自動偵測是否使用資料庫
+    
     @classmethod
     def validate(cls):
         """驗證必要的環境變數是否存在"""

@@ -9,6 +9,8 @@ from typing import Dict, List, Optional, Any
 from collections import deque
 from dataclasses import dataclass, field
 import logging
+from .database import QuantumDatabase
+from .vectorizer import QuantumVectorizer
 
 logger = logging.getLogger(__name__)
 
@@ -144,9 +146,16 @@ class QuantumIdentity:
 class QuantumMemory:
     """單一角色的量子記憶"""
     
-    def __init__(self, persona_id: str):
+    def __init__(self, persona_id: str, use_database: bool = True):
         self.persona_id = persona_id
         self.identity = QuantumIdentity()
+        self.use_database = use_database
+        
+        # 初始化資料庫和向量化器
+        if self.use_database:
+            self.db = QuantumDatabase()
+            self.vectorizer = QuantumVectorizer()
+            self._memory_id = None  # 資料庫中的記憶 ID
         self.crystals: Dict[str, MemoryCrystal] = {}
         self.ripples: deque = deque(maxlen=100)  # 最近100個漣漪
         self.entanglements: Dict[str, float] = {}  # 與其他角色的量子糾纏
@@ -205,6 +214,14 @@ class QuantumMemory:
             "impact": self._calculate_impact(event)
         }
         self.ripples.append(ripple)
+        
+        # 即時保存到資料庫
+        if self.use_database and self.db and self.db.pool and self._memory_id:
+            try:
+                event_vector = self.vectorizer.vectorize_event(event)
+                self.db.save_ripple(self._memory_id, ripple, event_vector)
+            except Exception as e:
+                logger.error(f"Failed to save ripple to database: {e}")
     
     def _calculate_impact(self, event: dict) -> float:
         """計算事件的影響力"""
@@ -243,7 +260,8 @@ class QuantumMemory:
         return [crystal for crystal, _ in crystals_with_score[:n]]
     
     def save(self):
-        """保存量子記憶到檔案"""
+        """保存量子記憶到檔案和資料庫"""
+        # 總是保存到檔案作為備份
         memory_path = f"quantum_memory/memories/{self.persona_id}.json"
         
         data = {
@@ -265,36 +283,111 @@ class QuantumMemory:
         with open(memory_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         
+        # 同時保存到資料庫
+        if self.use_database and self.db and self.db.pool:
+            try:
+                # 保存主記憶
+                identity_vector = self.vectorizer.vectorize_identity(self.identity.to_dict())
+                self._memory_id = self.db.save_quantum_memory(
+                    self.persona_id,
+                    self.identity.to_dict(),
+                    identity_vector
+                )
+                
+                if self._memory_id:
+                    # 保存記憶晶體
+                    for crystal in self.crystals.values():
+                        concept_vector = self.vectorizer.vectorize_concept(
+                            crystal.concept,
+                            [p.to_dict() for p in crystal.possibilities]
+                        )
+                        self.db.save_memory_crystal(
+                            self._memory_id,
+                            crystal.to_dict(),
+                            concept_vector
+                        )
+                    
+                    # 保存漣漪（只保存最近的）
+                    for ripple in list(self.ripples)[-10:]:
+                        event_vector = self.vectorizer.vectorize_event(ripple['event'])
+                        self.db.save_ripple(self._memory_id, ripple, event_vector)
+                
+                logger.info(f"Saved quantum memory to database for {self.persona_id}")
+            except Exception as e:
+                logger.error(f"Failed to save to database: {e}")
+        
         self.last_save = datetime.now()
         logger.info(f"Saved quantum memory for {self.persona_id}")
     
     def load(self):
-        """從檔案載入量子記憶"""
-        memory_path = f"quantum_memory/memories/{self.persona_id}.json"
+        """從資料庫或檔案載入量子記憶"""
+        loaded_from_db = False
         
-        if not os.path.exists(memory_path):
-            logger.info(f"No existing memory found for {self.persona_id}")
-            return
+        # 優先從資料庫載入
+        if self.use_database and self.db and self.db.pool:
+            try:
+                memory_data = self.db.get_quantum_memory(self.persona_id)
+                if memory_data:
+                    self._memory_id = memory_data['id']
+                    self.identity = QuantumIdentity.from_dict(memory_data['identity_data'])
+                    self.created_at = memory_data['created_at']
+                    
+                    # 載入記憶晶體
+                    crystals_data = self.db.get_memory_crystals(self._memory_id)
+                    self.crystals = {}
+                    for crystal_data in crystals_data:
+                        crystal = MemoryCrystal.from_dict({
+                            'id': crystal_data['crystal_id'],
+                            'concept': crystal_data['concept'],
+                            'possibilities': crystal_data['possibilities'],
+                            'stability': crystal_data['stability'],
+                            'creation_time': crystal_data['created_at'].isoformat(),
+                            'last_evolution': crystal_data['updated_at'].isoformat()
+                        })
+                        self.crystals[crystal.id] = crystal
+                    
+                    # 載入漣漪
+                    ripples_data = self.db.get_ripples(self._memory_id)
+                    self.ripples = deque(maxlen=100)
+                    for ripple_data in ripples_data:
+                        self.ripples.append({
+                            'timestamp': ripple_data['timestamp'].isoformat(),
+                            'event': ripple_data['event_data'],
+                            'impact': ripple_data['impact']
+                        })
+                    
+                    loaded_from_db = True
+                    logger.info(f"Loaded quantum memory from database for {self.persona_id}")
+            except Exception as e:
+                logger.error(f"Failed to load from database: {e}")
         
-        try:
-            with open(memory_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+        # 如果資料庫載入失敗，從檔案載入
+        if not loaded_from_db:
+            memory_path = f"quantum_memory/memories/{self.persona_id}.json"
             
-            self.identity = QuantumIdentity.from_dict(data["identity"])
+            if not os.path.exists(memory_path):
+                logger.info(f"No existing memory found for {self.persona_id}")
+                return
             
-            self.crystals = {}
-            for cid, crystal_data in data.get("crystals", {}).items():
-                self.crystals[cid] = MemoryCrystal.from_dict(crystal_data)
-            
-            self.ripples = deque(data.get("ripples", []), maxlen=100)
-            self.entanglements = data.get("entanglements", {})
-            self.evolution_count = data.get("evolution_count", 0)
-            self.created_at = datetime.fromisoformat(data["created_at"])
-            
-            logger.info(f"Loaded quantum memory for {self.persona_id}")
-            
-        except Exception as e:
-            logger.error(f"Failed to load quantum memory: {e}")
+            try:
+                with open(memory_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                self.identity = QuantumIdentity.from_dict(data["identity"])
+                
+                self.crystals = {}
+                for cid, crystal_data in data.get("crystals", {}).items():
+                    self.crystals[cid] = MemoryCrystal.from_dict(crystal_data)
+                
+                self.ripples = deque(data.get("ripples", []), maxlen=100)
+                self.entanglements = data.get("entanglements", {})
+                self.evolution_count = data.get("evolution_count", 0)
+                self.created_at = datetime.fromisoformat(data["created_at"])
+                
+                logger.info(f"Loaded quantum memory from file for {self.persona_id}")
+                
+            except Exception as e:
+                logger.error(f"Failed to load quantum memory: {e}")
     
     def to_summary(self) -> str:
         """生成記憶摘要"""

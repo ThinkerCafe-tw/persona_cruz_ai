@@ -13,7 +13,8 @@ class QuantumIntegration:
     """整合量子記憶到現有系統"""
     
     def __init__(self):
-        self.bridge = QuantumMemoryBridge()
+        # 強制使用資料庫模式
+        self.bridge = QuantumMemoryBridge(use_database=True)
         self.monitor = QuantumMonitor(self.bridge)
         self.five_elements = None  # 將在需要時初始化
         
