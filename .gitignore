@@ -62,3 +62,13 @@ ngrok
 local_settings.py
 *.db
 *.sqlite3
+
+# Test cache
+.pytest_cache/
+htmlcov/
+.coverage
+*.cover
+
+# 專案特定暫存檔
+quantum_memory_metrics.json
+railway_setup_checklist.md
