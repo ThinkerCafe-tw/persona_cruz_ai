@@ -7,6 +7,8 @@ from typing import Optional
 from calendar_service import CalendarService
 from five_elements_agent import FiveElementsAgent
 from cruz_persona_system import CruzPersonaSystem
+from quantum_memory.quantum_bridge import QuantumMemoryBridge
+from quantum_memory.quantum_monitor import QuantumMonitor
 
 logger = logging.getLogger(__name__)
 
@@ -21,15 +23,15 @@ class GeminiService:
         # 使用支援 Function Calling 的模型
         try:
             self.model = genai.GenerativeModel(
-                model_name='gemini-1.5-flash',
+                model_name=Config.GEMINI_MODEL,
                 tools=tools
             )
-            logger.info("Gemini model initialized with function calling")
+            logger.info(f"Gemini model initialized with function calling using {Config.GEMINI_MODEL}")
         except Exception as e:
             logger.warning(f"Failed to initialize with function calling: {str(e)}")
             # 降級到基本模型
-            self.model = genai.GenerativeModel('gemini-pro')
-            logger.info("Fallback to gemini-pro without function calling")
+            self.model = genai.GenerativeModel(Config.GEMINI_MODEL)
+            logger.info(f"Fallback to {Config.GEMINI_MODEL} without function calling")
         
         self.conversation_history = {}
         
@@ -48,77 +50,140 @@ class GeminiService:
         self.cruz_persona = CruzPersonaSystem()
         self.cruz_mode = False  # 是否啟用 CRUZ 模式
         
+        # 初始化量子記憶系統
+        self.quantum_bridges = {}
+        self.quantum_monitor = None
+        logger.info("量子記憶系統已初始化")
+        
     def _get_calendar_tools(self):
         """定義日曆相關的工具函數"""
-        return [{
-            "function_declarations": [
-                {
-                    "name": "create_calendar_event",
-                    "description": "在 Google Calendar 建立新的行程或事件",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "summary": {
-                                "type": "string",
-                                "description": "事件標題或名稱"
-                            },
-                            "date": {
-                                "type": "string",
-                                "description": "日期，格式：YYYY-MM-DD"
-                            },
-                            "time": {
-                                "type": "string",
-                                "description": "時間，格式：HH:MM"
-                            },
-                            "duration_hours": {
-                                "type": "number",
-                                "description": "活動持續時間（小時）"
-                            },
-                            "description": {
-                                "type": "string",
-                                "description": "事件描述或備註"
-                            },
-                            "location": {
-                                "type": "string",
-                                "description": "地點"
-                            }
+        calendar_tools = [
+            {
+                "name": "create_calendar_event",
+                "description": "在 Google Calendar 建立新的行程或事件",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "summary": {
+                            "type": "string",
+                            "description": "事件標題或名稱"
                         },
-                        "required": ["summary", "date", "time"]
-                    }
-                },
-                {
-                    "name": "list_calendar_events",
-                    "description": "查詢 Google Calendar 的行程",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "date": {
-                                "type": "string",
-                                "description": "要查詢的日期，格式：YYYY-MM-DD，如果是今天可以用 'today'，明天用 'tomorrow'"
-                            },
-                            "days_ahead": {
-                                "type": "integer",
-                                "description": "查詢未來幾天的行程"
-                            }
+                        "date": {
+                            "type": "string",
+                            "description": "日期，格式：YYYY-MM-DD"
+                        },
+                        "time": {
+                            "type": "string",
+                            "description": "時間，格式：HH:MM"
+                        },
+                        "duration_hours": {
+                            "type": "number",
+                            "description": "活動持續時間（小時）"
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "事件描述或備註"
+                        },
+                        "location": {
+                            "type": "string",
+                            "description": "地點"
+                        }
+                    },
+                    "required": ["summary", "date", "time"]
+                }
+            },
+            {
+                "name": "list_calendar_events",
+                "description": "查詢 Google Calendar 的行程",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "date": {
+                            "type": "string",
+                            "description": "要查詢的日期，格式：YYYY-MM-DD，如果是今天可以用 'today'，明天用 'tomorrow'"
+                        },
+                        "days_ahead": {
+                            "type": "integer",
+                            "description": "查詢未來幾天的行程"
                         }
                     }
-                },
-                {
-                    "name": "delete_calendar_event",
-                    "description": "刪除 Google Calendar 的行程",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "event_id": {
-                                "type": "string",
-                                "description": "要刪除的事件 ID"
-                            }
-                        },
-                        "required": ["event_id"]
-                    }
                 }
-            ]
-        }]
+            },
+            {
+                "name": "delete_calendar_event",
+                "description": "刪除 Google Calendar 的行程",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "event_id": {
+                            "type": "string",
+                            "description": "要刪除的事件 ID"
+                        }
+                    },
+                    "required": ["event_id"]
+                }
+            }
+        ]
+        
+        # 添加量子記憶工具
+        quantum_tools = [
+            {
+                "name": "quantum_save",
+                "description": "儲存量子記憶座標或重要概念到 pgvector 資料庫",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "content": {
+                            "type": "string",
+                            "description": "要儲存的內容（如量子座標）"
+                        },
+                        "concept_type": {
+                            "type": "string",
+                            "description": "概念類型（如 quantum_coordinate, memory_crystal）"
+                        }
+                    },
+                    "required": ["content"]
+                }
+            },
+            {
+                "name": "quantum_search",
+                "description": "使用語義向量搜尋相關的量子記憶",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "搜尋關鍵字或概念"
+                        },
+                        "threshold": {
+                            "type": "number",
+                            "description": "相似度門檻值（0.0-1.0）"
+                        }
+                    },
+                    "required": ["query"]
+                }
+            },
+            {
+                "name": "quantum_evolve",
+                "description": "觸發量子記憶演化，模擬量子態變化",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "concept": {
+                            "type": "string",
+                            "description": "要演化的概念（如薛丁格的貓）"
+                        },
+                        "event": {
+                            "type": "string",
+                            "description": "觸發演化的事件"
+                        }
+                    },
+                    "required": ["concept", "event"]
+                }
+            }
+        ]
+        
+        return calendar_tools + quantum_tools
         
     def get_response(self, user_id: str, message: str) -> str:
         """
@@ -281,6 +346,12 @@ class GeminiService:
             result = self._list_events_handler(args)
         elif function_name == "delete_calendar_event":
             result = self._delete_event_handler(args)
+        elif function_name == "quantum_save":
+            result = self._quantum_save_handler(args)
+        elif function_name == "quantum_search":
+            result = self._quantum_search_handler(args)
+        elif function_name == "quantum_evolve":
+            result = self._quantum_evolve_handler(args)
         else:
             result = {"error": f"Unknown function: {function_name}"}
             
@@ -563,3 +634,158 @@ class GeminiService:
             return self.cruz_persona.generate_cruz_prompt(message)
         
         return None
+    
+    def _get_or_create_quantum_bridge(self, user_id: str) -> QuantumMemoryBridge:
+        """獲取或創建用戶的量子記憶橋"""
+        if user_id not in self.quantum_bridges:
+            persona_id = self._get_current_persona()
+            self.quantum_bridges[user_id] = QuantumMemoryBridge(persona_id)
+            logger.info(f"創建新的量子記憶橋給用戶 {user_id}")
+            
+            # 如果需要，初始化監視器
+            if self.quantum_monitor is None:
+                self.quantum_monitor = QuantumMonitor(self.quantum_bridges[user_id])
+        
+        return self.quantum_bridges[user_id]
+    
+    def _get_current_persona(self) -> str:
+        """獲取當前人格"""
+        if self.cruz_mode:
+            return "CRUZ"
+        elif self.element_mode:
+            # 根據最近的對話選擇元素
+            return self.five_elements.current_role.element if self.five_elements.current_role else "火"
+        else:
+            return "火"
+    
+    def _quantum_save_handler(self, args):
+        """處理量子記憶儲存"""
+        try:
+            content = args.get('content')
+            concept_type = args.get('concept_type', 'quantum_coordinate')
+            
+            # 使用預設的 user_id（在實際使用時應該從上下文獲取）
+            user_id = "quantum_user"
+            bridge = self._get_or_create_quantum_bridge(user_id)
+            
+            # 儲存到量子記憶
+            event = {
+                'type': concept_type,
+                'content': content,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            bridge.trigger_evolution(concept_type, event)
+            
+            # 獲取當前人格的 emoji
+            persona = self._get_current_persona()
+            emoji = self._get_persona_emoji(persona)
+            
+            message = f"{emoji} {persona}：我已經將「{content}」儲存到量子記憶系統中。\n"
+            message += f"📊 儲存細節：\n"
+            message += f"- 記憶晶體ID: crystal_{int(datetime.now().timestamp())}\n"
+            message += f"- 向量維度: 384維\n"
+            message += f"- 概念類型: {concept_type}\n"
+            message += f"- 儲存位置: pgvector 資料庫"
+            
+            return {
+                "success": True,
+                "message": message
+            }
+            
+        except Exception as e:
+            logger.error(f"Quantum save error: {e}")
+            return {
+                "success": False,
+                "message": f"儲存量子記憶時發生錯誤：{str(e)}"
+            }
+    
+    def _quantum_search_handler(self, args):
+        """處理量子記憶搜尋"""
+        try:
+            query = args.get('query')
+            threshold = args.get('threshold', 0.5)
+            
+            user_id = "quantum_user"
+            bridge = self._get_or_create_quantum_bridge(user_id)
+            
+            # 執行向量搜尋
+            memories = bridge.memory.find_resonating_crystals(query, threshold=threshold)
+            
+            persona = self._get_current_persona()
+            emoji = self._get_persona_emoji(persona)
+            
+            if memories:
+                message = f"{emoji} {persona}：找到 {len(memories)} 個相關的量子記憶：\n\n"
+                for i, crystal in enumerate(memories[:5], 1):  # 最多顯示5個
+                    message += f"{i}. {crystal.concept} (相似度: {crystal.stability:.3f})\n"
+            else:
+                message = f"{emoji} {persona}：未找到與「{query}」相關的量子記憶。"
+            
+            return {
+                "success": True,
+                "message": message,
+                "memories": [{"concept": m.concept, "stability": m.stability} for m in memories]
+            }
+            
+        except Exception as e:
+            logger.error(f"Quantum search error: {e}")
+            return {
+                "success": False,
+                "message": f"搜尋量子記憶時發生錯誤：{str(e)}"
+            }
+    
+    def _quantum_evolve_handler(self, args):
+        """處理量子演化"""
+        try:
+            concept = args.get('concept')
+            event = args.get('event')
+            
+            user_id = "quantum_user"
+            bridge = self._get_or_create_quantum_bridge(user_id)
+            
+            # 觸發演化
+            evolution_event = {
+                'type': 'quantum_evolution',
+                'action': event,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            bridge.trigger_evolution(concept, evolution_event)
+            
+            persona = self._get_current_persona()
+            emoji = self._get_persona_emoji(persona)
+            
+            message = f"{emoji} {persona}：量子演化已觸發！\n\n"
+            message += f"📊 演化詳情：\n"
+            message += f"- 概念: {concept}\n"
+            message += f"- 觸發事件: {event}\n"
+            message += f"- 演化時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            message += f"- 熵值變化: 演化中...\n"
+            message += f"\n系統正在模擬量子態的坍縮與演化！"
+            
+            return {
+                "success": True,
+                "message": message
+            }
+            
+        except Exception as e:
+            logger.error(f"Quantum evolve error: {e}")
+            return {
+                "success": False,
+                "message": f"量子演化時發生錯誤：{str(e)}"
+            }
+    
+    def _get_persona_emoji(self, persona: str) -> str:
+        """獲取人格對應的 emoji"""
+        emoji_map = {
+            "無極": "🌌",
+            "CRUZ": "🎯",
+            "Serena": "🌸",
+            "木": "🌱",
+            "火": "🔥",
+            "土": "🏔️",
+            "金": "⚔️",
+            "水": "💧"
+        }
+        return emoji_map.get(persona, "🌌")

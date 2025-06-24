@@ -21,7 +21,7 @@ class Config:
     IS_RAILWAY = os.getenv('RAILWAY_ENVIRONMENT') is not None
     
     # Gemini 模型設定
-    GEMINI_MODEL = 'gemini-pro'
+    GEMINI_MODEL = 'gemini-1.5-flash'
     
     # 資料庫設定 (pgvector)
     DATABASE_URL = os.getenv('DATABASE_URL')
