@@ -1,207 +1,103 @@
-# Persona Cruz AI - Line Bot with Gemini
+```markdown
+# 個性化 AI 助手計畫
 
-一個整合了 Google Gemini AI 的 Line 聊天機器人，部署在 Railway 雲端平台。
+歡迎來到「個性化 AI 助手計畫」的官方指導中心！
 
-## 功能特色
+## 🎯 專案目標
 
-- 🤖 使用 Google Gemini AI 進行智能對話
-- 💬 支援對話記憶功能（每個用戶獨立）
-- 😄 內建 50 個冷笑話功能
-- 📅 Google Calendar 整合（建立、查詢、更新、刪除行程）
-- 🔍 自然語言理解日曆操作
-- ✅ 啟動自我檢測系統
-- 🚀 24/7 雲端運行在 Railway 平台
-- 🔮 **無極 AI Agents OS** - 五行元素協作系統
-- 🎯 **CRUZ AI 伴侶系統** - 數位分身開發夥伴
-- 🧠 用戶心理分析與個性化回應（TDD 開發）
-- 📝 開發對話自動記憶成長系統
+本專案旨在基於開源專案 [LibreChat](https://librechat.ai/) 進行 Fork 和深度客製化，最終打造一個具備以下核心特性的「個性化 AI 助手」：
 
-## 專案結構
+*   **深度個性化**：能夠理解並適應不同用戶的需求、偏好和溝通風格。
+*   **高級長期記憶**：擁有跨對話、與用戶和特定 AI 人格綁定的持久化記憶能力。
+*   **無縫嵌入整合**：可以方便地作為 Widget 或組件嵌入到現有的網站或業務平台中。
+*   **可信賴與可控**：用戶對其 AI 助手的行為和記憶有清晰的認知與管理能力。
+*   **強大的語音交互**：支持流暢自然的語音輸入與輸出。
+*   **成本可追蹤**：能夠監控和管理 AI 服務的調用成本。
 
+## 🌌 CLAUDE.md - 我們的協作宇宙核心
+
+本專案的所有參與者（無論是 AI 代理還是人類成員）的核心行動準則、團隊文化、人格分工、溝通協議（如 AI 日記、Scene Code）以及共同的價值觀與記憶傳承機制，均詳細定義在根目錄下的 **[CLAUDE.md](./CLAUDE.md)** 文件中。
+
+**在開始任何工作之前，請務必首先深入理解 [CLAUDE.md](./CLAUDE.md) 的內容。**
+
+## 📖 AGENTS.md - AI 代理協作指南
+
+為了更好地指導 AI 代理（如 Jules）在本專案中的工作，我們編寫了 **[AGENTS.md](./AGENTS.md)** 文件。它詳細說明了 AI 代理應如何利用本倉庫中的「記憶檔」（`design_docs/`）以及遵循 `CLAUDE.md` 的原則進行高效協作。
+
+## 🧬 設計文檔 (記憶檔) - `design_docs/`
+
+專案的詳細規劃、技術評估、架構設計、功能藍圖、以及根據 `CLAUDE.md` 精神制定的協作細則，均沉澱在 **`design_docs/`** 目錄中。這些文檔是我們集體智慧的結晶，也是指導後續開發的核心「基因」。
+
+**重要提示：** 由於工具對包含非 ASCII 字符路徑的處理限制，`design_docs/` 目錄下的子目錄和文件名目前暫時使用純 ASCII 命名。在您將此倉庫克隆到本地後，請根據以下映射關係將其重命名為目標中文名稱，以獲得最佳的閱讀和協作體驗。
+
+**目錄與文件重命名映射表：**
+
+請在克隆倉庫後，手動執行以下重命名操作，以恢復設計文檔的預期中文路徑結構：
+
+**目錄重命名：**
+*   `mv design_docs/c00_project_origin_and_vision design_docs/00_太極本源與專案願景`
+*   `mv design_docs/c01_system_architecture_earth design_docs/01_系統架構藍圖_土`
+*   `mv design_docs/c02_personality_memory_wood_fire design_docs/02_人格建構與高級記憶引擎_木_火`
+*   `mv design_docs/c03_ui_ux_integration_wood_fire design_docs/03_UI_UX與嵌入式整合_木_火`
+*   `mv design_docs/c04_voice_interaction_fire_metal design_docs/04_語音互動整合_火_金`
+*   `mv design_docs/c05_deployment_ops_cost_earth_metal design_docs/05_部署_運維與成本考量_土_金`
+*   `mv design_docs/c06_customization_roadmap_cruz_wuji design_docs/06_客製化開發路線圖_CRUZ_無極`
+*   `mv design_docs/c07_ai_diary_lessons_water_wuji design_docs/07_AI協作日記與教訓集_水_無極`
+
+**文件重命名 (在對應的中文目錄下執行)：**
+
+*   `cd design_docs/00_太極本源與專案願景/`
+    *   `mv f00_vision_and_fork_rationale.md 00_project_vision_and_librechat_fork_rationale.md`
+    *   `mv f01_five_elements_roles.md 01_five_elements_and_roles_in_project.md`
+*   `cd ../01_系統架構藍圖_土/`
+    *   `mv f01_overall_architecture.md 01_overall_architecture_overview.md`
+    *   `mv f02_backend_stack.md 02_backend_stack.md`
+    *   `mv f03_multi_model_ai_gateway_strategy.md 03_multi_model_routing.md`
+    *   `mv f04_tool_extension_and_agent_framework.md 04_plugin_and_agent_strategy.md`
+*   `cd ../02_人格建構與高級記憶引擎_木_火/`
+    *   `mv f01_personality_construction.md 01_personality_construction.md`
+    *   `mv f02_advanced_memory_module_design_v1.md 02_advanced_memory_module_design.md`
+*   `cd ../03_UI_UX與嵌入式整合_木_火/`
+    *   `mv f01_ui_stack_and_branding.md 01_ui_stack_and_branding.md`
+    *   `mv f02_user_auth_and_roles.md 02_user_auth_and_roles.md`
+    *   `mv f03_embeddable_widget_design_v1.md 03_embeddable_widget_design.md`
+*   `cd ../04_語音互動整合_火_金/`
+    *   `mv f01_stt_tts_integration_strategy.md 01_stt_tts_integration.md`
+*   `cd ../05_部署_運維與成本考量_土_金/`
+    *   `mv f01_deployment_strategy_and_cicd.md 01_deployment_architecture.md`
+    *   `mv f02_fork_customization_effort.md 02_development_workflow_and_cost_estimation.md`
+*   `cd ../06_客製化開發路線圖_CRUZ_無極/`
+    *   `mv phase_1_core_memory_engine.md phase_1_core_personality_memory.md`
+    *   `mv phase_2_embeddable_widget_branding.md phase_2_embeddable_widget_branding.md`
+    *   `mv phase_3_token_economics_cost_tracking.md phase_3_token_economics_cost_tracking.md`
+    *   `mv phase_4_contextual_workspace_ui_ux.md phase_4_contextual_workspace_ui_ux.md`
+*   `cd ../07_AI協作日記與教訓集_水_無極/daily_dev_logs/`
+    *   (此目錄下的 `template_ai_diary_entry.md` 文件名已是預期格式，無需更改)
+*   `cd ../` (返回到 `07_AI協作日記與教訓集_水_無極/`)
+    *   `mv lessons_learned_and_best_practices.md lessons_learned_and_best_practices.md` (文件名已是預期格式，無需更改)
+
+(請注意，上述 `mv` 指令是 Unix/Linux 環境下的命令，Windows 環境下請使用 `ren` 或文件管理器操作。)
+
+**建議查閱順序：**
+
+1.  **[CLAUDE.md](./CLAUDE.md)**: 理解團隊協作的元框架。
+2.  **[AGENTS.md](./AGENTS.md)**: 了解 AI 代理的工作方式。
+3.  **`design_docs/c00_project_origin_and_vision/f00_vision_and_fork_rationale.md`**: 了解專案的總體願景和為何選擇 LibreChat。
+4.  根據您的角色和當前任務，查閱 `design_docs/` 下的其他相關詳細設計文檔。
+
+## 📜 LibreChat 原始評估報告
+
+我們對 LibreChat 進行的「深度技術與產品評估報告」原文已存檔於 **[librechat_assessment_report.md](./librechat_assessment_report.md)**，供隨時參考。
+
+## 🚀 快速開始 (開發者)
+
+1.  **Fork & Clone**: Fork 本倉庫，然後克隆到您的本地環境。
+2.  **遵循 `CLAUDE.md` 和 `AGENTS.md`**。
+3.  **重命名 `design_docs/` 下的目錄和文件** (根據後續提供的映射表)。
+4.  **環境配置**: (詳細步驟待補充，初期可參考 LibreChat 官方文檔及 `design_docs/c05_deployment_ops_cost_earth_metal/` 中的部署文檔)。
+5.  **開始您的冒險！** 🔥💧🏔️⚔️🌱🎯🌸🌌
+
+---
+
+讓我們攜手，將「個性化 AI 助手計畫」從藍圖變為現實！
 ```
-persona_cruz_ai/
-├── .env.example           # 環境變數範例
-├── .gitignore            # Git 忽略檔案
-├── requirements.txt      # Python 套件清單
-├── Procfile             # Railway 啟動指令
-├── app.py               # Flask 主程式
-├── config.py            # 設定檔
-├── line_bot_handler.py  # Line Bot 處理邏輯
-├── gemini_service.py    # Gemini API 整合
-├── calendar_service.py  # Google Calendar 整合
-├── five_elements_agent.py# 無極 AI Agents OS 核心
-├── cruz_persona_system.py# CRUZ 人格語料系統
-├── user_analyzer.py     # 用戶心理分析器
-├── cruz_developer_mode.py# CRUZ 開發者模式
-├── conversation_memory_sync.py # 對話記憶同步
-├── cruz_ai_companion.py # CRUZ AI 伴侶主程式
-├── jokes.py             # 笑話資料
-├── startup_test.py      # 啟動自我檢測
-├── tests/               # TDD 測試檔案
-├── data/cruz_corpus.json# CRUZ 語料庫
-├── development_lessons.json # 開發教訓記錄
-├── CLAUDE.md           # Claude Code 文件
-└── README.md           # 專案說明
-```
-
-## 使用說明
-
-### 基本對話
-
-直接在 Line 中傳送訊息給機器人，它會使用 Gemini AI 回應。
-
-### 特殊指令
-
-- `/help` 或 `幫助` - 顯示使用說明
-- `/clear` 或 `清除對話` - 清除對話記錄
-- `說個笑話` - 隨機回覆一個冷笑話
-- `/test` - 執行系統自我測試
-
-### 無極系統指令
-
-- `/dashboard` 或 `/狀態` - 查看完整系統儀表板
-- `/status` 或 `/mini` - 查看簡易系統狀態  
-- `/harmony` 或 `/和諧度` - 查看五行和諧度
-
-### 日曆功能
-
-- 建立行程：「幫我安排明天下午3點開會」
-- 查詢行程：「我明天有什麼行程？」
-- 自然語言對話即可操作日曆
-
-## 無極 AI Agents OS
-
-無極系統是一個基於五行理論的 AI 協作框架，讓不同角色的 AI 代理能夠協同工作：
-
-### 五行元素角色
-
-- **🌲 木（產品經理）** - 創意規劃、需求分析、功能設計
-- **🔥 火（開發專員）** - 快速實作、熱情編碼、創新解法
-- **🏔️ 土（架構師）** - 系統設計、穩定基礎、深思熟慮
-- **⚔️ 金（優化專員）** - 程式優化、效能提升、精益求精
-- **💧 水（測試專員）** - 錯誤發現、品質把關、細心檢測
-
-### 無極觀察者
-
-**⚪ 無極** - 超然觀察、平衡調節、智慧引導
-
-當系統檢測到：
-- 某個元素過度活躍
-- 角色間陷入循環
-- 需要新的視角
-
-無極會適時介入，提供指引和平衡建議。
-
-### CRUZ 開發夥伴
-
-**🎯 CRUZ** - 您的數位分身，協助開發決策
-
-特質：
-- 真誠直接，不說廢話
-- 鼓勵創造，相信潛能
-- 快速決策，相信直覺
-- 用戶至上，簡單優先
-
-### 自動切換機制
-
-系統會根據對話內容自動切換適合的角色：
-- 提到「需求」「規劃」→ 木
-- 提到「開發」「實作」→ 火
-- 提到「架構」「設計」→ 土
-- 提到「優化」「效能」→ 金
-- 提到「測試」「錯誤」→ 水
-- 需要快速決策 → CRUZ
-
-## 部署到 Railway
-
-### 快速部署步驟
-
-1. **註冊 Railway 帳號**
-   - 前往 [Railway](https://railway.app) 註冊帳號
-   - 連結您的 GitHub 帳號
-
-2. **建立新專案**
-   - 點擊 "New Project"
-   - 選擇 "Deploy from GitHub repo"
-   - 選擇 `persona_cruz_ai` 專案
-
-3. **設定環境變數**
-   在 Railway 專案設定中新增以下環境變數：
-   ```
-   LINE_CHANNEL_ACCESS_TOKEN=您的_Line_Channel_Access_Token
-   LINE_CHANNEL_SECRET=您的_Line_Channel_Secret
-   GEMINI_API_KEY=您的_Gemini_API_Key
-   GOOGLE_CALENDAR_CREDENTIALS=您的_Google_服務帳戶_JSON（選用）
-   FLASK_ENV=production
-   ```
-
-4. **取得部署 URL**
-   - 部署完成後，Railway 會提供一個固定的 HTTPS URL
-   - 格式類似：`https://your-app-name.up.railway.app`
-
-5. **更新 Line Bot Webhook**
-   - 回到 Line Developers Console
-   - 將 Webhook URL 更新為：`https://your-railway-url.up.railway.app/callback`
-   - 點擊 Verify 確認連線
-
-## Google Calendar 設定（選用）
-
-1. **建立 Google Cloud 專案**
-   - 到 [Google Cloud Console](https://console.cloud.google.com)
-   - 啟用 Google Calendar API
-
-2. **建立服務帳戶**
-   - 建立服務帳戶並下載 JSON 金鑰
-   - 將 JSON 內容轉為單行字串
-
-3. **分享日曆**
-   - 在 Google Calendar 分享您的日曆給服務帳戶 email
-   - 給予「進行變更及管理共用設定」權限
-
-## 注意事項
-
-1. 所有設定都在 Railway 環境變數中管理
-2. 不需要本機 `.env` 檔案
-3. 自動從 GitHub 部署更新
-
-## 授權
-
-## CRUZ AI 伴侶系統
-
-### 本地開發模式
-
-運行 CRUZ AI 伴侶（您的數位分身開發夥伴）：
-
-```bash
-python cruz_ai_companion.py
-```
-
-### 功能特色
-
-1. **對話記憶成長**
-   - 自動記錄開發對話
-   - 提取重要洞察為語料
-   - 越用越了解您的風格
-
-2. **多角色切換**
-   - CRUZ：您的數位分身
-   - 五行角色：專業分工
-   - 無極：全局觀察
-
-3. **開發決策支援**
-   - 基於您的價值觀給建議
-   - 記錄重要決策理由
-   - 追蹤開發洞察
-
-### 指令說明
-
-- `/mode <角色>` - 切換角色
-- `/status` - 查看系統狀態
-- `/insights` - 查看開發洞察
-- `/save` - 保存對話
-- `/help` - 顯示幫助
-- `/quit` - 結束程式
-
-## 授權
-
-MIT License
