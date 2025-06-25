@@ -1,0 +1,3 @@
+[submodule "librechat_fork"]
+	path = librechat_fork
+	url = https://github.com/danny-avila/LibreChat.git

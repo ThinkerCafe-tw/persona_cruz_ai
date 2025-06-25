@@ -72,3 +72,6 @@ htmlcov/
 # 專案特定暫存檔
 quantum_memory_metrics.json
 railway_setup_checklist.md
+
+# LibreChat fork as submodule
+librechat_fork/

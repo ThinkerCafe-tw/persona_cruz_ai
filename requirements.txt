@@ -10,3 +10,12 @@ google-auth-httplib2>=0.1.0
 psycopg2-binary>=2.9.0
 pgvector>=0.2.0
 numpy>=1.24.0
+
+# FastAPI 相關（用於量子記憶 API）
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.0.0
+sqlalchemy>=2.0.0
+asyncpg>=0.29.0
+aiofiles>=23.0.0
+websockets>=12.0

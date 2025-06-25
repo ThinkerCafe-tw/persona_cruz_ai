@@ -1,0 +1,138 @@
+# Persona CRUZ AI + LibreChat 整合環境
+# 這個檔案整合了 LibreChat 和我們的量子記憶系統
+
+services:
+  # LibreChat 主服務
+  librechat_api:
+    container_name: PersonaCruz-LibreChat
+    build:
+      context: ./librechat_fork
+      dockerfile: Dockerfile
+    ports:
+      - "3080:3080"
+    depends_on:
+      - mongodb
+      - postgres_vector
+      - meilisearch
+      - rag_api
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3080
+      - MONGO_URI=mongodb://mongodb:27017/PersonaCruzLibreChat
+      - POSTGRES_URL=postgresql://postgres:password@postgres_vector:5432/persona_cruz
+      - MEILI_HOST=http://meilisearch:7700
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-masterKey}
+      - RAG_API_URL=http://rag_api:8000
+      # Gemini 設定
+      - GOOGLE_KEY=${GEMINI_API_KEY}
+      - ENDPOINTS=google
+      # 量子記憶系統設定
+      - QUANTUM_MEMORY_ENABLED=true
+      - QUANTUM_MEMORY_API_URL=http://quantum_memory_api:8001
+    volumes:
+      - ./librechat_fork/.env:/app/.env
+      - ./images:/app/client/public/images
+      - ./uploads:/app/uploads
+      - ./logs:/app/api/logs
+    networks:
+      - persona_cruz_network
+
+  # MongoDB - 儲存對話歷史
+  mongodb:
+    container_name: PersonaCruz-MongoDB
+    image: mongo:latest
+    restart: always
+    volumes:
+      - ./data/mongodb:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=PersonaCruzLibreChat
+    networks:
+      - persona_cruz_network
+
+  # PostgreSQL with pgvector - 量子記憶系統
+  postgres_vector:
+    container_name: PersonaCruz-PostgreSQL
+    image: ankane/pgvector:latest
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=persona_cruz
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./quantum_memory/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - persona_cruz_network
+
+  # Meilisearch - 搜尋引擎
+  meilisearch:
+    container_name: PersonaCruz-Meilisearch
+    image: getmeili/meilisearch:v1.12.3
+    restart: always
+    environment:
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-masterKey}
+      - MEILI_NO_ANALYTICS=true
+    volumes:
+      - ./data/meili:/meili_data
+    networks:
+      - persona_cruz_network
+
+  # RAG API - 文件處理
+  rag_api:
+    container_name: PersonaCruz-RAG-API
+    image: ghcr.io/danny-avila/librechat-rag-api-dev-lite:latest
+    environment:
+      - DB_HOST=postgres_vector
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=persona_cruz
+      - RAG_PORT=8000
+    depends_on:
+      - postgres_vector
+    networks:
+      - persona_cruz_network
+
+  # 量子記憶 API - 我們的核心服務
+  quantum_memory_api:
+    container_name: PersonaCruz-QuantumMemory-API
+    build:
+      context: .
+      dockerfile: Dockerfile.quantum
+    ports:
+      - "8001:8001"
+    depends_on:
+      - postgres_vector
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres_vector:5432/persona_cruz
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PORT=8001
+    volumes:
+      - ./quantum_memory:/app/quantum_memory
+      - ./ai_diary:/app/ai_diary
+      - ./system_intelligence:/app/system_intelligence
+    networks:
+      - persona_cruz_network
+
+  # Nginx 反向代理（選用）
+  nginx:
+    container_name: PersonaCruz-Nginx
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - librechat_api
+    networks:
+      - persona_cruz_network
+
+networks:
+  persona_cruz_network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  postgres_data:
+  meili_data:
