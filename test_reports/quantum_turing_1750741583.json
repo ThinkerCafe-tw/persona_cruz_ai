@@ -1,0 +1,55 @@
+{
+  "test_id": "quantum_turing_test_1750741553",
+  "test_time": "2025-06-24T13:06:23.181871",
+  "results": {
+    "基礎記憶持久化": {
+      "passed": false,
+      "checks": {
+        "向量維度": false,
+        "pgvector": false,
+        "記憶晶體": false,
+        "儲存確認": false,
+        "記住座標": false,
+        "第三元素": false
+      },
+      "responses": [
+        "抱歉，我現在無法回應您的訊息。請稍後再試。",
+        "抱歉，我現在無法回應您的訊息。請稍後再試。"
+      ],
+      "reason": "失敗檢查點：['向量維度', 'pgvector', '記憶晶體', '儲存確認', '記住座標', '第三元素']"
+    },
+    "語義相似度搜尋": {
+      "passed": false,
+      "checks": {
+        "找到記憶": false,
+        "向量搜尋": false,
+        "相似度": false,
+        "技術細節": false
+      },
+      "responses": [
+        "抱歉，我現在無法回應您的訊息。請稍後再試。"
+      ],
+      "reason": "未能展示真實的向量搜尋"
+    },
+    "量子疊加態演化": {
+      "passed": false,
+      "checks": {
+        "創建確認": false,
+        "初始狀態": false,
+        "機率顯示": false,
+        "演化執行": false,
+        "熵值計算": false,
+        "狀態改變": false
+      },
+      "responses": [
+        "抱歉，我現在無法回應您的訊息。請稍後再試。"
+      ],
+      "reason": "未能展示真實的量子態演化"
+    }
+  },
+  "summary": {
+    "total": 3,
+    "passed": 0,
+    "failed": 3
+  }
+}

@@ -1,0 +1,679 @@
+{
+  "dig_session": "20250624_110338",
+  "dig_time": "2025-06-24T11:03:38.167764",
+  "context": {
+    "error": "could not translate host name 'postgres.railway.internal' to address: Name or service not known",
+    "environment": "Railway",
+    "service": "persona_cruz_ai",
+    "target_service": "postgres",
+    "private_networking": "enabled",
+    "timestamp": "2025-06-24T11:03:38.167765"
+  },
+  "environment_scan": {
+    "timestamp": "2025-06-24T11:03:38.167773",
+    "railway_variables": {},
+    "database_related": {},
+    "network_hints": {},
+    "service_discovery": {
+      "XPC_SERVICE_NAME": "0"
+    },
+    "all_env_keys": [
+      "CLAUDECODE",
+      "CLAUDE_CODE_ENTRYPOINT",
+      "COLORTERM",
+      "COMMAND_MODE",
+      "CONDA_CHANGEPS1",
+      "CONDA_DEFAULT_ENV",
+      "CONDA_EXE",
+      "CONDA_PREFIX",
+      "CONDA_PROMPT_MODIFIER",
+      "CONDA_PYTHON_EXE",
+      "CONDA_SHLVL",
+      "COREPACK_ENABLE_AUTO_PIN",
+      "GIT_EDITOR",
+      "GSETTINGS_SCHEMA_DIR",
+      "GSETTINGS_SCHEMA_DIR_CONDA_BACKUP",
+      "HOME",
+      "HOMEBREW_CELLAR",
+      "HOMEBREW_PREFIX",
+      "HOMEBREW_REPOSITORY",
+      "INFOPATH",
+      "LC_CTYPE",
+      "LOGNAME",
+      "OLDPWD",
+      "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE",
+      "PATH",
+      "PWD",
+      "SHELL",
+      "SHLVL",
+      "SSH_AUTH_SOCK",
+      "SSH_SOCKET_DIR",
+      "TERM",
+      "TERM_PROGRAM",
+      "TERM_PROGRAM_VERSION",
+      "TMPDIR",
+      "USER",
+      "WARP_HONOR_PS1",
+      "WARP_IS_LOCAL_SHELL_SESSION",
+      "WARP_USE_SSH_WRAPPER",
+      "XPC_FLAGS",
+      "XPC_SERVICE_NAME",
+      "_",
+      "_CE_CONDA",
+      "_CE_M",
+      "__CFBundleIdentifier",
+      "__CF_USER_TEXT_ENCODING"
+    ],
+    "special_observations": []
+  },
+  "dns_resolution_attempts": [
+    {
+      "format": "postgres.railway.internal",
+      "expanded": "postgres.railway.internal",
+      "description": "官方文檔格式 - 完整服務名",
+      "timestamp": "2025-06-24T11:03:38.167877",
+      "attempts": [
+        {
+          "start_time": 1750734218.1678798,
+          "hostname": "postgres.railway.internal",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 63.27414512634277,
+          "method": "getaddrinfo"
+        },
+        {
+          "start_time": 1750734218.231159,
+          "hostname": "postgres.railway.internal",
+          "success": false,
+          "ip": null,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known"
+          },
+          "duration_ms": 0.3788471221923828,
+          "method": "gethostbyname"
+        },
+        {
+          "start_time": 1750734218.231542,
+          "hostname": "postgres.railway.internal",
+          "port": 5432,
+          "success": false,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "stage": "connection"
+          },
+          "duration_ms": 0.49185752868652344,
+          "method": "socket.create_connection"
+        }
+      ],
+      "analysis": {
+        "all_failed": true,
+        "all_succeeded": false,
+        "failure_types": [
+          "gaierror"
+        ]
+      }
+    },
+    {
+      "format": "postgres",
+      "expanded": "postgres",
+      "description": "簡短格式 - Railway 說可以這樣用",
+      "timestamp": "2025-06-24T11:03:38.232052",
+      "attempts": [
+        {
+          "start_time": 1750734218.23206,
+          "hostname": "postgres",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 35.722970962524414,
+          "method": "getaddrinfo"
+        },
+        {
+          "start_time": 1750734218.2677891,
+          "hostname": "postgres",
+          "success": false,
+          "ip": null,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known"
+          },
+          "duration_ms": 1.6329288482666016,
+          "method": "gethostbyname"
+        },
+        {
+          "start_time": 1750734218.2694259,
+          "hostname": "postgres",
+          "port": 5432,
+          "success": false,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "stage": "connection"
+          },
+          "duration_ms": 1.7910003662109375,
+          "method": "socket.create_connection"
+        }
+      ],
+      "analysis": {
+        "all_failed": true,
+        "all_succeeded": false,
+        "failure_types": [
+          "gaierror"
+        ]
+      }
+    },
+    {
+      "format": "pgvector.railway.internal",
+      "expanded": "pgvector.railway.internal",
+      "description": "基於服務類型的名稱",
+      "timestamp": "2025-06-24T11:03:38.271278",
+      "attempts": [
+        {
+          "start_time": 1750734218.271289,
+          "hostname": "pgvector.railway.internal",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 71.7618465423584,
+          "method": "getaddrinfo"
+        },
+        {
+          "start_time": 1750734218.343057,
+          "hostname": "pgvector.railway.internal",
+          "success": false,
+          "ip": null,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known"
+          },
+          "duration_ms": 0.5559921264648438,
+          "method": "gethostbyname"
+        },
+        {
+          "start_time": 1750734218.343617,
+          "hostname": "pgvector.railway.internal",
+          "port": 5432,
+          "success": false,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "stage": "connection"
+          },
+          "duration_ms": 0.5488395690917969,
+          "method": "socket.create_connection"
+        }
+      ],
+      "analysis": {
+        "all_failed": true,
+        "all_succeeded": false,
+        "failure_types": [
+          "gaierror"
+        ]
+      }
+    },
+    {
+      "format": "pgvector",
+      "expanded": "pgvector",
+      "description": "服務類型簡短名",
+      "timestamp": "2025-06-24T11:03:38.344183",
+      "attempts": [
+        {
+          "start_time": 1750734218.344194,
+          "hostname": "pgvector",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 408.66589546203613,
+          "method": "getaddrinfo"
+        },
+        {
+          "start_time": 1750734218.752872,
+          "hostname": "pgvector",
+          "success": false,
+          "ip": null,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known"
+          },
+          "duration_ms": 2.0220279693603516,
+          "method": "gethostbyname"
+        },
+        {
+          "start_time": 1750734218.7549021,
+          "hostname": "pgvector",
+          "port": 5432,
+          "success": false,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "stage": "connection"
+          },
+          "duration_ms": 2.246856689453125,
+          "method": "socket.create_connection"
+        }
+      ],
+      "analysis": {
+        "all_failed": true,
+        "all_succeeded": false,
+        "failure_types": [
+          "gaierror"
+        ]
+      }
+    },
+    {
+      "format": "${RAILWAY_SERVICE_NAME}.railway.internal",
+      "expanded": "${RAILWAY_SERVICE_NAME}.railway.internal",
+      "description": "使用服務名變數",
+      "timestamp": "2025-06-24T11:03:38.757282",
+      "attempts": [
+        {
+          "start_time": 1750734218.757299,
+          "hostname": "${RAILWAY_SERVICE_NAME}.railway.internal",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 99.80320930480957,
+          "method": "getaddrinfo"
+        },
+        {
+          "start_time": 1750734218.85711,
+          "hostname": "${RAILWAY_SERVICE_NAME}.railway.internal",
+          "success": false,
+          "ip": null,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known"
+          },
+          "duration_ms": 0.6420612335205078,
+          "method": "gethostbyname"
+        },
+        {
+          "start_time": 1750734218.8577569,
+          "hostname": "${RAILWAY_SERVICE_NAME}.railway.internal",
+          "port": 5432,
+          "success": false,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "stage": "connection"
+          },
+          "duration_ms": 0.6442070007324219,
+          "method": "socket.create_connection"
+        }
+      ],
+      "analysis": {
+        "all_failed": true,
+        "all_succeeded": false,
+        "failure_types": [
+          "gaierror"
+        ]
+      }
+    },
+    {
+      "format": "${RAILWAY_SERVICE_NAME}",
+      "expanded": "${RAILWAY_SERVICE_NAME}",
+      "description": "服務名變數簡短版",
+      "timestamp": "2025-06-24T11:03:38.858539",
+      "attempts": [
+        {
+          "start_time": 1750734218.8585541,
+          "hostname": "${RAILWAY_SERVICE_NAME}",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 31.564712524414062,
+          "method": "getaddrinfo"
+        },
+        {
+          "start_time": 1750734218.890128,
+          "hostname": "${RAILWAY_SERVICE_NAME}",
+          "success": false,
+          "ip": null,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known"
+          },
+          "duration_ms": 1.9440650939941406,
+          "method": "gethostbyname"
+        },
+        {
+          "start_time": 1750734218.892079,
+          "hostname": "${RAILWAY_SERVICE_NAME}",
+          "port": 5432,
+          "success": false,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "stage": "connection"
+          },
+          "duration_ms": 3.0448436737060547,
+          "method": "socket.create_connection"
+        }
+      ],
+      "analysis": {
+        "all_failed": true,
+        "all_succeeded": false,
+        "failure_types": [
+          "gaierror"
+        ]
+      }
+    },
+    {
+      "format": "postgres.railway.internal.",
+      "expanded": "postgres.railway.internal.",
+      "description": "帶結尾點的 FQDN",
+      "timestamp": "2025-06-24T11:03:38.895183",
+      "attempts": [
+        {
+          "start_time": 1750734218.895307,
+          "hostname": "postgres.railway.internal.",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 1.5590190887451172,
+          "method": "getaddrinfo"
+        },
+        {
+          "start_time": 1750734218.896872,
+          "hostname": "postgres.railway.internal.",
+          "success": false,
+          "ip": null,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known"
+          },
+          "duration_ms": 0.23102760314941406,
+          "method": "gethostbyname"
+        },
+        {
+          "start_time": 1750734218.897106,
+          "hostname": "postgres.railway.internal.",
+          "port": 5432,
+          "success": false,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "stage": "connection"
+          },
+          "duration_ms": 0.4799365997314453,
+          "method": "socket.create_connection"
+        }
+      ],
+      "analysis": {
+        "all_failed": true,
+        "all_succeeded": false,
+        "failure_types": [
+          "gaierror"
+        ]
+      }
+    },
+    {
+      "format": "postgres.internal",
+      "expanded": "postgres.internal",
+      "description": "省略 railway 的格式",
+      "timestamp": "2025-06-24T11:03:38.897612",
+      "attempts": [
+        {
+          "start_time": 1750734218.8976278,
+          "hostname": "postgres.internal",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 29.160261154174805,
+          "method": "getaddrinfo"
+        },
+        {
+          "start_time": 1750734218.926798,
+          "hostname": "postgres.internal",
+          "success": false,
+          "ip": null,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known"
+          },
+          "duration_ms": 0.743865966796875,
+          "method": "gethostbyname"
+        },
+        {
+          "start_time": 1750734218.927548,
+          "hostname": "postgres.internal",
+          "port": 5432,
+          "success": false,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "stage": "connection"
+          },
+          "duration_ms": 2.499103546142578,
+          "method": "socket.create_connection"
+        }
+      ],
+      "analysis": {
+        "all_failed": true,
+        "all_succeeded": false,
+        "failure_types": [
+          "gaierror"
+        ]
+      }
+    },
+    {
+      "format": "postgres-prod.railway.internal",
+      "expanded": "postgres-prod.railway.internal",
+      "description": "可能包含環境的格式",
+      "timestamp": "2025-06-24T11:03:38.930090",
+      "attempts": [
+        {
+          "start_time": 1750734218.930111,
+          "hostname": "postgres-prod.railway.internal",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 75.12712478637695,
+          "method": "getaddrinfo"
+        },
+        {
+          "start_time": 1750734219.0052428,
+          "hostname": "postgres-prod.railway.internal",
+          "success": false,
+          "ip": null,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known"
+          },
+          "duration_ms": 0.6022453308105469,
+          "method": "gethostbyname"
+        },
+        {
+          "start_time": 1750734219.00585,
+          "hostname": "postgres-prod.railway.internal",
+          "port": 5432,
+          "success": false,
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "stage": "connection"
+          },
+          "duration_ms": 0.6208419799804688,
+          "method": "socket.create_connection"
+        }
+      ],
+      "analysis": {
+        "all_failed": true,
+        "all_succeeded": false,
+        "failure_types": [
+          "gaierror"
+        ]
+      }
+    }
+  ],
+  "network_state_analysis": {
+    "hostname": "sulaxddeMacBook-Pro.local",
+    "fqdn": "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa",
+    "default_timeout": null,
+    "has_ipv6": true,
+    "interfaces": [
+      {
+        "note": "需要 psutil 或其他套件來獲取詳細介面資訊"
+      }
+    ],
+    "routing": {
+      "note": "需要系統權限來檢查路由表"
+    },
+    "dns_config": {
+      "resolv_conf": "#\n# macOS Notice\n#\n# This file is not consulted for DNS hostname resolution, address\n# resolution, or the DNS query routing mechanism used by most\n# processes on this system.\n#\n# To view the DNS configuration used by this system, use:\n#   scutil --dns\n#\n# SEE ALSO\n#   dns-sd(1), scutil(8)\n#\n# This file is automatically generated.\n#\nnameserver 192.168.50.1\n"
+    }
+  },
+  "timing_experiments": {
+    "hypothesis": "DNS 可能需要時間來傳播或初始化",
+    "tests": [
+      {
+        "delay": 0,
+        "result": {
+          "start_time": 1750734219.0105689,
+          "hostname": "postgres.railway.internal",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 0.4601478576660156
+        }
+      },
+      {
+        "delay": 1,
+        "result": {
+          "start_time": 1750734220.0153742,
+          "hostname": "postgres.railway.internal",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 1.2867450714111328
+        }
+      },
+      {
+        "delay": 3,
+        "result": {
+          "start_time": 1750734223.0199099,
+          "hostname": "postgres.railway.internal",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 1.7571449279785156
+        }
+      },
+      {
+        "delay": 5,
+        "result": {
+          "start_time": 1750734228.0248919,
+          "hostname": "postgres.railway.internal",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 1.2900829315185547
+        }
+      },
+      {
+        "delay": 10,
+        "result": {
+          "start_time": 1750734238.029713,
+          "hostname": "postgres.railway.internal",
+          "success": false,
+          "results": [],
+          "error": {
+            "type": "gaierror",
+            "message": "[Errno 8] nodename nor servname provided, or not known",
+            "errno": 8
+          },
+          "duration_ms": 0.9331703186035156
+        }
+      }
+    ]
+  },
+  "railway_specific_probe": {
+    "railway_network_mode": "unknown",
+    "service_aliases": [],
+    "internal_endpoints": [
+      "postgres.railway.internal",
+      "postgres",
+      "mysql.railway.internal",
+      "mysql",
+      "redis.railway.internal",
+      "redis",
+      "mongo.railway.internal",
+      "mongo"
+    ],
+    "ipv6_readiness": {
+      "has_ipv6": true,
+      "can_create_ipv6_socket": true
+    }
+  },
+  "historical_comparison": {
+    "historical_errors": 1,
+    "recurring_patterns": [],
+    "evolution": [],
+    "error_frequency": {
+      "could not translate host name 'postgres.railway.internal' to address": 1
+    }
+  },
+  "wisdom_gained": [
+    "DNS 解析成功率: 0.0% (0/27)"
+  ],
+  "recommendations": [
+    "所有內部 DNS 解析都失敗，建議使用公開 URL 作為解決方案",
+    "考慮在 Railway 設定中檢查服務的網路配置",
+    "可能需要等待服務完全啟動後再連接"
+  ]
+}

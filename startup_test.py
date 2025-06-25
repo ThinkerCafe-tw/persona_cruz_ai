@@ -510,6 +510,19 @@ class StartupTest:
         test_name = "pgvector 資料庫"
         print(f"\n🗄️  測試 {test_name}...")
         
+        # 執行完整的 DNS 考古診斷（永久保存每次的診斷結果）
+        from system_intelligence.diagnostics import DNSArchaeology
+        from system_intelligence import SystemChronicles
+        
+        dns_archaeologist = DNSArchaeology()
+        chronicles = SystemChronicles()
+        
+        # 記錄這次測試開始
+        chronicles.record_event("DATABASE_TEST_START", {
+            "test_name": test_name,
+            "context": "startup_test"
+        })
+        
         try:
             # 從 config 取得已轉換的 DATABASE_URL
             from config import Config
@@ -589,7 +602,28 @@ class StartupTest:
             error_msg = f"無法連接到資料庫: {str(e)}"
             self.critical_failures.append(error_msg)
             self.test_agent.remember_test(test_name, False, time.time() - self.start_time, error_msg)
-            print(f"❌ {error_msg}")
+            
+            # 執行深度 DNS 診斷
+            print("\n🏺 執行 DNS 考古診斷...")
+            dns_findings = dns_archaeologist.archaeological_dig({
+                "error": str(e),
+                "database_url_format": database_url.split('://')[0] if database_url else "unknown",
+                "timestamp": datetime.now().isoformat()
+            })
+            
+            # 記錄發現
+            chronicles.record_event("DNS_ARCHAEOLOGY_COMPLETE", dns_findings)
+            
+            # 如果有智慧產生，記錄下來
+            for wisdom in dns_findings.get("wisdom_gained", []):
+                chronicles.add_wisdom(wisdom, "DNS診斷", "自動網路診斷")
+            
+            # 顯示診斷結果
+            print("\n📊 DNS 診斷結果：")
+            for rec in dns_findings.get("recommendations", []):
+                print(f"   💡 {rec}")
+                
+            print(f"\n❌ {error_msg}")
             print("💡 請確認：")
             print("   1. PostgreSQL 服務是否運作中")
             print("   2. DATABASE_URL 是否正確")

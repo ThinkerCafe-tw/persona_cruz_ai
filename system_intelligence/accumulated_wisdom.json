@@ -1,0 +1,32 @@
+[
+  {
+    "id": "W001",
+    "source": "Line Bot Handler 事件",
+    "wisdom": "空檔案不代表沒程式，邏輯可能在其他地方",
+    "application": "永遠先搜尋再實作"
+  },
+  {
+    "id": "W002",
+    "source": "量子記憶整合",
+    "wisdom": "真實性比宣稱更重要",
+    "application": "建立可驗證的記憶機制，不只是說說"
+  },
+  {
+    "id": "W003",
+    "source": "清理事件後的反思",
+    "wisdom": "刪除的程式碼是失去的記憶",
+    "application": "建立完整性哲學，保存一切"
+  },
+  {
+    "id": "W004",
+    "source": "DNS 危機",
+    "wisdom": "看似簡單的問題可能有深層的複雜性",
+    "application": "建立完整的診斷考古系統"
+  },
+  {
+    "id": "W005",
+    "source": "DNS 考古學研究",
+    "wisdom": "Railway 內部網路只能在容器內存取",
+    "application": "本地開發應使用公開 URL，部署後使用內部 URL"
+  }
+]

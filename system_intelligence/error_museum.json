@@ -1,0 +1,12 @@
+[
+  {
+    "id": "ERR_004",
+    "date": "2025-06-24",
+    "time": "11:03:58",
+    "error": "DNS resolution failed for all Railway internal hostnames",
+    "context": "DNS archaeology test",
+    "lesson": "Railway internal DNS may require specific conditions or timing",
+    "fixed": false,
+    "status": "recorded"
+  }
+]
