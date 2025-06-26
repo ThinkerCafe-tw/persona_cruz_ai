@@ -1,0 +1,148 @@
+# CRUZ AI Personas Integration for LibreChat
+version: 1.2.1
+
+# Enable caching for better performance
+cache: true
+
+# Interface configuration
+interface:
+  customWelcome: "🎯 Welcome to CRUZ AI! Choose your AI persona and let's get things done!"
+  endpointsMenu: true
+  modelSelect: true
+  parameters: true
+  sidePanel: true
+  presets: true
+  prompts: true
+  bookmarks: true
+  multiConvo: true
+  agents: true
+
+# Custom endpoints for CRUZ AI Personas
+endpoints:
+  custom:
+    # CRUZ - Decisive Action-Oriented AI
+    - name: 'CRUZ'
+      apiKey: '${GEMINI_API_KEY}'
+      baseURL: 'http://localhost:8001/v1'  # Our persona proxy server
+      models:
+        default: ['cruz-decisive']
+        fetch: false
+      titleConvo: true
+      titleModel: 'cruz-decisive'
+      modelDisplayLabel: '🎯 CRUZ'
+      iconURL: 'https://raw.githubusercontent.com/your-repo/main/icons/cruz.png'
+      # Custom headers to identify persona
+      headers:
+        x-persona-type: 'cruz'
+        x-memory-enabled: 'true'
+      # Custom parameters for CRUZ personality
+      addParams:
+        persona_traits:
+          decisiveness: 0.95
+          confidence: 0.90
+          action_oriented: 0.92
+        emotion_engine: true
+        memory_integration: true
+      
+    # Serena - Supportive AI Assistant
+    - name: 'Serena'
+      apiKey: '${GEMINI_API_KEY}'
+      baseURL: 'http://localhost:8001/v1'
+      models:
+        default: ['serena-supportive']
+        fetch: false
+      titleConvo: true
+      titleModel: 'serena-supportive'
+      modelDisplayLabel: '🌸 Serena'
+      headers:
+        x-persona-type: 'serena'
+        x-memory-enabled: 'true'
+      addParams:
+        persona_traits:
+          empathy: 0.95
+          patience: 0.90
+          supportiveness: 0.93
+        emotion_engine: true
+        memory_integration: true
+    
+    # Five Elements System
+    - name: 'FiveElements'
+      apiKey: '${GEMINI_API_KEY}'
+      baseURL: 'http://localhost:8001/v1'
+      models:
+        default: ['wood-creative', 'fire-passionate', 'earth-stable', 'metal-precise', 'water-adaptive']
+        fetch: false
+      titleConvo: true
+      titleModel: 'current_model'
+      modelDisplayLabel: '🌳🔥🏔️⚔️💧 Five Elements'
+      headers:
+        x-persona-type: 'five-elements'
+        x-memory-enabled: 'true'
+      addParams:
+        allow_switching: true
+        memory_integration: true
+        team_collaboration: true
+
+# Model configurations
+modelsConfig:
+  'cruz-decisive':
+    description: "Decisive, action-oriented AI that cuts through complexity"
+    context_window: 32768
+    max_output_tokens: 4096
+    temperature_range: [0.7, 0.9]
+    default_temperature: 0.8
+    
+  'serena-supportive':
+    description: "Empathetic, patient AI that provides emotional support"
+    context_window: 32768
+    max_output_tokens: 4096
+    temperature_range: [0.6, 0.8]
+    default_temperature: 0.7
+    
+  'wood-creative':
+    description: "Creative and innovative problem solver"
+    context_window: 32768
+    max_output_tokens: 4096
+    
+  'fire-passionate':
+    description: "Energetic implementer who drives action"
+    context_window: 32768
+    max_output_tokens: 4096
+    
+  'earth-stable':
+    description: "Stable architect who designs solid foundations"
+    context_window: 32768
+    max_output_tokens: 4096
+    
+  'metal-precise':
+    description: "Precise optimizer who refines solutions"
+    context_window: 32768
+    max_output_tokens: 4096
+    
+  'water-adaptive':
+    description: "Adaptive tester who ensures quality"
+    context_window: 32768
+    max_output_tokens: 4096
+
+# Memory API configuration
+memoryApi:
+  enabled: true
+  baseURL: 'http://localhost:8000'
+  authRequired: true
+  features:
+    - vector_search
+    - category_filtering
+    - emotion_tracking
+    - conversation_history
+
+# Persona switching configuration
+personaSwitching:
+  enabled: true
+  hotkeys:
+    cruz: 'alt+1'
+    serena: 'alt+2'
+    five_elements: 'alt+3'
+  indicators:
+    showCurrentPersona: true
+    showEmotionState: true
+    showMemoryStatus: true
