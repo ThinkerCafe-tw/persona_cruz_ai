@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 CRUZ AI 測試界面 - Railway 版</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .railway-banner {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+        .status {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(0, 255, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 0, 0.5);
+        }
+        .api-url-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+            font-size: 16px;
+        }
+        .api-url-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .persona-selector {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .persona-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .persona-btn:hover, .persona-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: translateY(-2px);
+        }
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background: rgba(100, 149, 237, 0.8);
+            margin-left: auto;
+            text-align: right;
+        }
+        .ai-message {
+            background: rgba(50, 205, 50, 0.8);
+            margin-right: auto;
+            white-space: pre-wrap;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        #messageInput {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 16px;
+        }
+        #sendBtn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        #sendBtn:hover {
+            background: #45a049;
+        }
+        #sendBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .loading {
+            text-align: center;
+            color: #ffd700;
+            font-style: italic;
+        }
+        .quantum-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 5px;
+            animation: pulse 2s infinite;
+        }
+        .quantum-active {
+            background: #00ff00;
+        }
+        .quantum-inactive {
+            background: #ff0000;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 CRUZ AI 測試界面</h1>
+        
+        <div class="railway-banner">
+            🚂 Railway 雲端版本 - 量子記憶增強
+        </div>
+
+        <input type="text" 
+               id="apiUrl" 
+               class="api-url-input" 
+               placeholder="輸入 Railway API URL (例如: https://your-app.up.railway.app)"
+               value="">
+        
+        <div class="status" id="status">
+            📡 等待輸入 Railway URL...
+        </div>
+
+        <div class="persona-selector">
+            <button class="persona-btn active" data-model="cruz-decisive">🎯 CRUZ</button>
+            <button class="persona-btn" data-model="serena-supportive">🌸 Serena</button>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="message ai-message">
+                🎯 <strong>CRUZ</strong>: 準備好了嗎？輸入你的 Railway URL，讓我們開始量子增強對話！
+            </div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="messageInput" placeholder="輸入你的訊息..." disabled />
+            <button id="sendBtn" disabled>發送</button>
+        </div>
+    </div>
+
+    <script>
+        let currentModel = 'cruz-decisive';
+        let API_BASE = '';
+        let isConnected = false;
+
+        // 檢查服務狀態
+        async function checkStatus() {
+            if (!API_BASE) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                const statusDiv = document.getElementById('status');
+                
+                if (data.status === 'healthy') {
+                    const quantumStatus = data.quantum_memory === 'enabled' ? 
+                        '<span class="quantum-indicator quantum-active"></span> 量子記憶已啟用' : 
+                        '<span class="quantum-indicator quantum-inactive"></span> 量子記憶未啟用';
+                    
+                    statusDiv.innerHTML = `✅ CRUZ 系統就緒 | 情緒: ${data.cruz_emotion} | ${quantumStatus}`;
+                    statusDiv.style.background = 'rgba(0, 255, 0, 0.2)';
+                    
+                    // 啟用輸入
+                    document.getElementById('messageInput').disabled = false;
+                    document.getElementById('sendBtn').disabled = false;
+                    isConnected = true;
+                    
+                    // 顯示量子狀態
+                    if (data.quantum_status) {
+                        console.log('量子記憶狀態:', data.quantum_status);
+                    }
+                } else {
+                    throw new Error('Service not healthy');
+                }
+            } catch (error) {
+                document.getElementById('status').innerHTML = `❌ 無法連接到服務 | 檢查 URL 是否正確`;
+                document.getElementById('status').style.background = 'rgba(255, 0, 0, 0.2)';
+                isConnected = false;
+                
+                // 禁用輸入
+                document.getElementById('messageInput').disabled = true;
+                document.getElementById('sendBtn').disabled = true;
+            }
+        }
+
+        // 發送消息
+        async function sendMessage() {
+            if (!isConnected) return;
+            
+            const input = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const chatContainer = document.getElementById('chatContainer');
+            
+            const message = input.value.trim();
+            if (!message) return;
+
+            // 添加用戶消息
+            addMessage(message, 'user');
+            
+            // 清空輸入並禁用按鈕
+            input.value = '';
+            sendBtn.disabled = true;
+            sendBtn.textContent = '發送中...';
+
+            // 添加載入指示
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message ai-message loading';
+            loadingDiv.innerHTML = '🤔 量子計算中...';
+            chatContainer.appendChild(loadingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: currentModel,
+                        messages: [
+                            { role: 'user', content: message }
+                        ],
+                        user: 'railway_test_user'
+                    })
+                });
+
+                const data = await response.json();
+                
+                // 移除載入指示
+                chatContainer.removeChild(loadingDiv);
+                
+                if (data.choices && data.choices[0]) {
+                    const aiResponse = data.choices[0].message.content;
+                    const persona = currentModel === 'cruz-decisive' ? '🎯 CRUZ' : '🌸 Serena';
+                    const quantumTag = data.quantum_memory ? ' [量子記憶]' : '';
+                    addMessage(`${persona}${quantumTag}: ${aiResponse}`, 'ai');
+                } else {
+                    addMessage('❌ 回應錯誤', 'ai');
+                }
+                
+            } catch (error) {
+                // 移除載入指示
+                chatContainer.removeChild(loadingDiv);
+                addMessage('❌ 連接錯誤: ' + error.message, 'ai');
+            }
+
+            // 重新啟用按鈕
+            sendBtn.disabled = false;
+            sendBtn.textContent = '發送';
+            input.focus();
+        }
+
+        // 添加消息到聊天容器
+        function addMessage(text, sender) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.textContent = text;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // 切換人格
+        function switchPersona(model) {
+            currentModel = model;
+            
+            // 更新按鈕狀態
+            document.querySelectorAll('.persona-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-model="${model}"]`).classList.add('active');
+            
+            // 添加切換消息
+            const persona = model === 'cruz-decisive' ? '🎯 CRUZ' : '🌸 Serena';
+            addMessage(`已切換到 ${persona}`, 'ai');
+        }
+
+        // API URL 變更處理
+        function handleApiUrlChange() {
+            const urlInput = document.getElementById('apiUrl');
+            API_BASE = urlInput.value.trim();
+            
+            if (API_BASE) {
+                // 移除尾部斜線
+                API_BASE = API_BASE.replace(/\/$/, '');
+                
+                // 檢查連接
+                checkStatus();
+            }
+        }
+
+        // 事件監聽器
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        document.getElementById('apiUrl').addEventListener('change', handleApiUrlChange);
+        document.getElementById('apiUrl').addEventListener('blur', handleApiUrlChange);
+
+        document.querySelectorAll('.persona-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchPersona(btn.dataset.model);
+            });
+        });
+
+        // 定期檢查狀態
+        setInterval(() => {
+            if (API_BASE && isConnected) {
+                checkStatus();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
