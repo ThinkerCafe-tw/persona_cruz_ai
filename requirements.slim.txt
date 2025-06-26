@@ -1,0 +1,15 @@
+# CRUZ Quantum Persona Proxy - Slim Version
+# 移除 sentence-transformers 以減少映像大小
+fastapi==0.104.1
+uvicorn==0.24.0
+httpx==0.25.1
+pydantic==2.5.0
+google-generativeai==0.3.2
+
+# 量子記憶基礎（不含向量化）
+psycopg2-binary==2.9.9
+pgvector==0.2.3
+numpy==1.24.3
+
+# 其他依賴
+python-dotenv==1.0.0

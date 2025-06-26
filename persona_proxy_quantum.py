@@ -24,7 +24,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # Railway 環境檢測
 RAILWAY_ENV = os.getenv("RAILWAY_ENVIRONMENT")
 
-# 導入量子記憶系統
+# 導入量子記憶系統（簡化版本）
 try:
     # 設定資料庫連接（Railway 共用資料庫）
     if RAILWAY_ENV:
@@ -32,12 +32,21 @@ try:
         os.environ['DATABASE_URL'] = os.getenv('DATABASE_PRIVATE_URL', os.getenv('DATABASE_URL', ''))
         logger.info(f"🚂 Railway 環境偵測：使用共用量子記憶資料庫")
     
-    from quantum_integration import QuantumIntegration
-    quantum_integration = QuantumIntegration()
-    QUANTUM_AVAILABLE = True
-    logger.info("✅ 量子記憶系統已載入")
+    # 嘗試載入量子記憶，如果失敗則使用簡化記憶
+    try:
+        from quantum_integration import QuantumIntegration
+        quantum_integration = QuantumIntegration()
+        QUANTUM_AVAILABLE = True
+        logger.info("✅ 完整量子記憶系統已載入")
+    except ImportError:
+        # 降級到簡化記憶系統
+        quantum_integration = None
+        QUANTUM_AVAILABLE = "simplified"
+        logger.info("🔧 使用簡化記憶系統（無向量化）")
+        
 except Exception as e:
-    logger.warning(f"⚠️ 量子記憶系統載入失敗: {e}")
+    logger.warning(f"⚠️ 記憶系統載入失敗: {e}")
+    quantum_integration = None
     QUANTUM_AVAILABLE = False
 
 # 嘗試導入 CRUZ 系統
