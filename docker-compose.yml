@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 資料庫
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: persona_cruz_memory
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./memory_api/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Memory API
+  memory-api:
+    build:
+      context: ./memory_api
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres/persona_cruz_memory
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Persona Proxy Server
+  persona-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.persona
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      MEMORY_API_URL: http://memory-api:8000
+    ports:
+      - "8001:8001"
+    depends_on:
+      memory-api:
+        condition: service_healthy
+    volumes:
+      - ./personality:/app/personality:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Unified Gateway
+  unified-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    environment:
+      PERSONA_PROXY_URL: http://persona-proxy:8001
+      MEMORY_API_URL: http://memory-api:8000
+    ports:
+      - "8002:8002"
+    depends_on:
+      - persona-proxy
+      - memory-api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nginx 反向代理
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - unified-gateway
+      - persona-proxy
+      - memory-api
+    restart: unless-stopped
+
+  # Prometheus 監控
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+
+  # Grafana 儀表板
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    name: cruz-ai-network
