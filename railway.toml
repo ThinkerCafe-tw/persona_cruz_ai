@@ -1,0 +1,16 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pip install -r requirements.quantum.txt"
+
+[deploy]
+startCommand = "python persona_proxy_quantum.py"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[[services]]
+name = "cruz-librechat"
+# 使用相同的資料庫服務
+[[services.databases]]
+name = "postgres"

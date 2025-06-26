@@ -12,9 +12,18 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# 安裝額外依賴
+RUN pip install --no-cache-dir fastapi uvicorn httpx google-generativeai
+
 # 複製應用程式碼
-COPY librechat_integration/persona_proxy_server.py .
+COPY librechat_integration/ ./librechat_integration/
 COPY personality/ ./personality/
+COPY cruz_personality.json .
+COPY emotion_engine.py .
+COPY cruz_chatbot.py .
+
+# 設定環境變數
+ENV PYTHONPATH=/app
 
 # 暴露端口
 EXPOSE 8001
@@ -24,4 +33,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8001/health || exit 1
 
 # 啟動應用
-CMD ["python", "persona_proxy_server.py"]
+CMD ["python", "-m", "uvicorn", "librechat_integration.persona_proxy_server:app", "--host", "0.0.0.0", "--port", "8001"]

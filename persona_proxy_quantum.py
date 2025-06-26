@@ -21,8 +21,17 @@ logger = logging.getLogger(__name__)
 # 添加專案路徑
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+# Railway 環境檢測
+RAILWAY_ENV = os.getenv("RAILWAY_ENVIRONMENT")
+
 # 導入量子記憶系統
 try:
+    # 設定資料庫連接（Railway 共用資料庫）
+    if RAILWAY_ENV:
+        # Railway 環境使用內部 URL
+        os.environ['DATABASE_URL'] = os.getenv('DATABASE_PRIVATE_URL', os.getenv('DATABASE_URL', ''))
+        logger.info(f"🚂 Railway 環境偵測：使用共用量子記憶資料庫")
+    
     from quantum_integration import QuantumIntegration
     quantum_integration = QuantumIntegration()
     QUANTUM_AVAILABLE = True
