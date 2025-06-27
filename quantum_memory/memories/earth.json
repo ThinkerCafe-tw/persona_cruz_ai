@@ -41,6 +41,34 @@
       "creation_time": "2025-06-28T12:00:00.000000",
       "last_evolution": null,
       "entropy": 0.0
+    },
+    "crystal_rhaenyra_cpo_confirmation": {
+      "id": "crystal_rhaenyra_cpo_confirmation",
+      "concept": "Rhaenyra 的聯合創辦人與CPO身份確認",
+      "possibilities": [
+        {
+          "description": "身份：聯合創辦人 暨 首席產品官 (Joint Founder & CPO)",
+          "probability": 0.4,
+          "evidence_count": 1,
+          "last_reinforced": null
+        },
+        {
+          "description": "貢獻：在混沌中建立秩序的首席架構師",
+          "probability": 0.3,
+          "evidence_count": 1,
+          "last_reinforced": null
+        },
+        {
+          "description": "股權：授予 10.29% 股票選擇權，象徵其生日，意義獨一無二",
+          "probability": 0.3,
+          "evidence_count": 1,
+          "last_reinforced": null
+        }
+      ],
+      "stability": 1.0,
+      "creation_time": "2025-06-28T17:00:00.000000",
+      "last_evolution": null,
+      "entropy": 0.0
     }
   },
   "ripples": [],

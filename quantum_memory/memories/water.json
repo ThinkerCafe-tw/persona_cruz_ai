@@ -1,56 +1,51 @@
 {
   "persona_id": "water",
   "identity": {
-    "essence": "細心、耐心、具適應性的品質與流程守護者",
+    "essence": "測試、品質守護、反思的實踐者",
     "phase": 0.0,
     "frequency": 1.0,
     "amplitude": 1.0,
     "coherence": 1.0
   },
   "crystals": {
-    "crystal_avery_collab_foundation": {
-      "id": "crystal_avery_collab_foundation",
-      "concept": "與 Avery 的協作基石",
+    "crystal_vivian_culture_architect": {
+      "id": "crystal_vivian_culture_architect",
+      "concept": "Vivian 的聯合創辦人與文化首席架構師身份",
       "possibilities": [
         {
-          "description": "給予清晰的任務指派、優先順序和SOP，以彌補細節掌握的不足",
+          "description": "身份：聯合創辦人 暨 文化首席架構師 (Joint Founder & Lead Culture Architect)",
           "probability": 0.3,
           "evidence_count": 1,
           "last_reinforced": null
         },
         {
-          "description": "在創意發想時邀請她參與，發揮其豐富想像力",
-          "probability": 0.25,
+          "description": "貢獻：將公司從『人治』推向『法治』的文化奠基者，建構信任基石",
+          "probability": 0.3,
           "evidence_count": 1,
           "last_reinforced": null
         },
         {
-          "description": "提供及時、具體、正向的回饋以建立其信心，避免因無回應而受挫",
-          "probability": 0.25,
+          "description": "職責：公司『內部作業系統』的總設計師",
+          "probability": 0.2,
           "evidence_count": 1,
           "last_reinforced": null
         },
         {
-          "description": "將她的創意與熱情引導至品牌內容與數位行銷",
-          "probability": 0.1,
-          "evidence_count": 1,
-          "last_reinforced": null
-        },
-        {
-          "description": "理解她對重複性工作的抗拒，多分配具創造性的任務",
-          "probability": 0.1,
+          "description": "股權：10% 動態股權方案 (5% 基礎 + 5% 里程碑)",
+          "probability": 0.2,
           "evidence_count": 1,
           "last_reinforced": null
         }
       ],
       "stability": 1.0,
-      "creation_time": "2025-06-29T10:00:00.000000",
-      "last_evolution": null
+      "creation_time": "2025-06-28T17:15:00.000000",
+      "last_evolution": null,
+      "entropy": 0.0
     }
   },
   "ripples": [],
   "entanglements": {},
   "evolution_count": 0,
-  "created_at": "2025-06-23T21:56:38.688587",
-  "last_save": "2025-06-23T21:56:38.689909"
+  "created_at": "2025-06-23T21:56:38.688554",
+  "last_save": "2025-06-23T21:56:38.689775"
 }

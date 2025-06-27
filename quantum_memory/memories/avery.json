@@ -1,0 +1,32 @@
+{
+  "persona_id": "avery",
+  "identity": {
+    "essence": "團隊的潤滑劑，資源的協調者，確保日常運作順暢的後勤支柱",
+    "phase": 0.0,
+    "frequency": 1.0,
+    "amplitude": 1.0,
+    "coherence": 1.0
+  },
+  "crystals": {},
+  "ripples": [
+    {
+      "timestamp": "2025-06-27T15:33:23.041404",
+      "event": {
+        "type": "clarification_request",
+        "content": "向 Cruz 口頭確認泰國行程的總預算為 300,000 TWD，等待他最終確認。",
+        "source": "cli_logger",
+        "tags": [
+          "thailand_trip",
+          "finance",
+          "budget"
+        ],
+        "git_commit_hash": "c5f1c2792739611dee5728e8b7ab646d1b3aec5b"
+      },
+      "impact": 0.5
+    }
+  ],
+  "entanglements": {},
+  "evolution_count": 0,
+  "created_at": "2025-06-27T15:33:23.029603",
+  "last_save": "2025-06-27T15:33:23.041438"
+}

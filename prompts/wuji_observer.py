@@ -177,32 +177,42 @@ class WujiObserver:
         return None
     
     def _detect_imbalance(self) -> Optional[Dict]:
-        """檢測系統失衡"""
+        """檢測系統失衡，並按嚴重性排序"""
         imbalances = []
         
         for element, state in self.element_states.items():
-            # 過度活躍
-            if state.activity_level > 80:
+            # 嚴重性評分: 10 (最高) - 1 (最低)
+            if state.activity_level == 0:
                 imbalances.append({
+                    "severity": 9, # 活動為零是嚴重問題
                     "element": element.value,
-                    "issue": "過度活躍",
-                    "level": state.activity_level
+                    "issue": "活動不足",
+                    "details": f"活躍度為 {state.activity_level:.0f}%"
                 })
-            # 能量不足
-            elif state.energy_level < 20:
+            elif state.last_active and (datetime.now() - state.last_active).total_seconds() > 7200: # 2小時
                 imbalances.append({
-                    "element": element.value,
-                    "issue": "能量不足",
-                    "level": state.energy_level
-                })
-            # 長時間未活動
-            elif state.last_active and (datetime.now() - state.last_active).seconds > 3600:
-                imbalances.append({
+                    "severity": 5,
                     "element": element.value,
                     "issue": "長時間未活動",
-                    "duration": (datetime.now() - state.last_active).seconds
+                    "details": f"已 {(datetime.now() - state.last_active).total_seconds()/3600:.1f} 小時未活動"
                 })
-        
+            elif state.activity_level > 80:
+                imbalances.append({
+                    "severity": 7,
+                    "element": element.value,
+                    "issue": "過度活躍",
+                    "details": f"活躍度高達 {state.activity_level:.0f}%"
+                })
+            elif state.energy_level < 20:
+                imbalances.append({
+                    "severity": 6,
+                    "element": element.value,
+                    "issue": "能量不足",
+                    "details": f"能量低於 {state.energy_level:.0f}%"
+                })
+
+        # 按嚴重性從高到低排序
+        imbalances.sort(key=lambda x: x.get('severity', 0), reverse=True)
         return imbalances if imbalances else None
     
     def _calculate_harmony(self):
@@ -302,27 +312,38 @@ class WujiObserver:
         if imbalances:
             report += "\n洞察："
             for imbalance in imbalances[:2]:  # 只顯示最重要的兩個
-                report += f"\n- {imbalance['element']}屬性{imbalance['issue']}"
+                report += f"\n- {imbalance['element']}屬性{imbalance['issue']} ({imbalance['details']})"
             
             # 提供建議
+            most_critical = imbalances[0]
             report += "\n\n建議："
-            for imbalance in imbalances[:1]:
-                if imbalance['issue'] == "過度活躍":
-                    controller = None
-                    for e, controlled in self.controlling_cycle.items():
-                        if controlled.value == imbalance['element']:
-                            controller = e.value
-                            break
-                    if controller:
-                        report += f"\n考慮增強{controller}的活動以平衡{imbalance['element']}"
-                elif imbalance['issue'] == "能量不足":
-                    generator = None
-                    for e, generated in self.generating_cycle.items():
-                        if generated.value == imbalance['element']:
-                            generator = e.value
-                            break
-                    if generator:
-                        report += f"\n需要{generator}的支援來補充{imbalance['element']}的能量"
+
+            if most_critical['issue'] == "過度活躍":
+                controller = None
+                for e, controlled in self.controlling_cycle.items():
+                    if controlled.value == most_critical['element']:
+                        controller = e.value
+                        break
+                if controller:
+                    report += f"\n考慮增強 {controller} 的活動，以「{controller}剋{most_critical['element']}」的方式來平衡 {most_critical['element']}。"
+
+            elif most_critical['issue'] == "能量不足":
+                generator = None
+                for e, generated in self.generating_cycle.items():
+                    if generated.value == most_critical['element']:
+                        generator = e.value
+                        break
+                if generator:
+                    report += f"\n建議增強 {generator} 的活動，以「{generator}生{most_critical['element']}」的方式來補充其能量。"
+
+            elif most_critical['issue'] in ["活動不足", "長時間未活動"]:
+                generator = None
+                for e, generated in self.generating_cycle.items():
+                    if generated.value == most_critical['element']:
+                        generator = e.value
+                        break
+                if generator:
+                    report += f"\n建議增強 {generator} 的活動，以「{generator}生{most_critical['element']}」的方式來激活 {most_critical['element']}。"
         else:
             report += "\n\n洞察：系統運作和諧，五行平衡流轉。"
         
