@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>思考者咖啡：AI-人類協作進化藍圖</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .phase {
+            background: #ecf0f1;
+            border-left: 5px solid;
+            padding: 20px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .phase:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        .phase-1 { border-color: #9b59b6; } /* CPO/Strategy - Amethyst */
+        .phase-2 { border-color: #f1c40f; } /* AI/System - Sun Flower */
+        .phase-3 { border-color: #e74c3c; } /* Engineering - Alizarin */
+        .phase-4 { border-color: #2ecc71; } /* Showcase/Growth - Emerald */
+
+        .phase h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+        }
+        .phase h3 span { margin-right: 10px; font-size: 1.5em; }
+        .persona-contribution {
+            margin-top: 15px;
+            padding-left: 20px;
+            border-left: 2px dotted #bdc3c7;
+        }
+        .persona {
+            margin-bottom: 10px;
+        }
+        .persona-name {
+            font-weight: bold;
+            color: #34495e;
+        }
+        .persona-name span {
+             display: inline-block;
+             width: 24px;
+        }
+        .summary {
+            background-color: #e8f4fd;
+            border: 1px solid #bde0fe;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 思考者咖啡：AI-人類協作進化藍圖</h1>
+        <p>此藍圖旨在建立一套「活文檔驅動式協作」流程，該流程對 <strong>Rhaenyra</strong> 而言是「結構清晰、策略穩固」的，對 <strong>Leo</strong> 而言則是「無感、專注、流暢」的。核心是將制度隱藏於無形的自動化之中。</p>
+
+        <h2>工作流程：從「想法」到「成果」的旅程</h2>
+        <div class="flowchart">
+            
+            <div class="phase phase-1">
+                <h3><span>💡</span>階段一：概念與結構化 (Rhaenyra 的產品設計院)</h3>
+                <p>一切始於 <strong>Rhaenyra</strong> 在 <code>cpo/tasks/</code> 下創建一個任務文檔 (e.g., <code>TASK-001.md</code>)。這是想法的播種之地。</p>
+                <div class="persona-contribution">
+                    <div class="persona">
+                        <span class="persona-name"><span>🏔️</span>土</span>: 自動提供標準化的「產品規格模板」，讓 Rhaenyra 無需從零開始，專注於策略思考。
+                    </div>
+                    <div class="persona">
+                        <span class="persona-name"><span>💧</span>水</span>: 在模板中自動注入「事前驗屍 (Pre-Mortem)」質疑清單，將未來風險轉化為當前的清晰邊界。
+                    </div>
+                </div>
+            </div>
+
+            <div class="phase phase-2">
+                <h3><span>🤖</span>階段二：精煉與賦能 (AI 團隊的自動化中樞)</h3>
+                <p>當任務文檔被提交時，系統自動介入，進行精煉與賦能，確保其成為一份「即時可開發」的任務。</p>
+                <div class="persona-contribution">
+                    <div class="persona">
+                        <span class="persona-name"><span>⚔️</span>金</span>: 透過 GitHub Action 自動檢查文檔格式，確保 `owner`, `status` 等元數據完整，實現無感知的治理。
+                    </div>
+                    <div class="persona">
+                        <span class="persona-name"><span>🔥</span>火</span>: 在文檔中自動填充技術細節，如 API 端點、程式碼骨架和測試清單，為 Leo 準備好「開發燃料包」。
+                    </div>
+                </div>
+            </div>
+
+            <div class="phase phase-3">
+                <h3><span>💻</span>階段三：開發與心流 (Leo 的工程師聖殿)</h3>
+                <p>任務以完美狀態出現在 <code>engineering/tasks/</code> 中。<strong>Leo</strong> 打開文檔，看到的是清晰的賽道，可以直接進入心流模式進行開發。</p>
+                <div class="persona-contribution">
+                    <p>此階段的目標是讓 AI 的工作完全透明，使 Leo 感覺不到流程的存在，眼中只有程式碼和需要征服的挑戰。</p>
+                </div>
+            </div>
+
+            <div class="phase phase-4">
+                <h3><span>🌳</span>階段四：開花與結果 (團隊共享的成就森林)</h3>
+                <p>當 Leo 將任務標記為完成時，系統自動將成果展示出來，讓每一次努力都被看見。</p>
+                 <div class="persona-contribution">
+                    <div class="persona">
+                        <span class="persona-name"><span>🌱</span>木</span>: 自動更新根目錄的 `README.md`，將完成的任務加入「🏆 最新成果」展廳，並以視覺化方式更新「專案森林」的生長進度。
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="summary">
+            <h2>總結：一個共生的生態系統</h2>
+            <p>這個流程創造了一個閉環：Rhaenyra 的策略思考，透過 AI 的自動化賦能，無縫轉化為 Leo 的高效開發，其成果又透過 AI 的自動化展示，反過來驗證了 Rhaenyra 的策略，並激勵整個團隊。每個人都在自己最擅長的領域工作，同時又能清晰地看見自己的貢獻如何推動整體前進。</p>
+        </div>
+
+    </div>
+</body>
+</html> 

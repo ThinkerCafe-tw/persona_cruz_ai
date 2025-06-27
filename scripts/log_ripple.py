@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 量子記憶漣漪記錄器 (Quantum Memory Ripple Logger)
+v2.0 - 時間旅行者版
 
 這是一個指令行工具，用於將事件（漣漪）記錄到指定角色的量子記憶中。
 """
@@ -18,15 +19,14 @@ from quantum_memory.quantum_memory import QuantumMemory
 def get_current_git_commit() -> str | None:
     """獲取當前的 git commit hash"""
     try:
-        # 執行 git 指令來獲取 HEAD 的 commit hash
+        # 使用 subprocess 執行 git 指令
         commit_hash = subprocess.check_output(
-            ['git', 'rev-parse', 'HEAD'], 
-            stderr=subprocess.STDOUT
+            ['git', 'rev-parse', 'HEAD'], stderr=subprocess.DEVNULL
         ).strip().decode('utf-8')
         return commit_hash
     except (subprocess.CalledProcessError, FileNotFoundError):
         # 如果不在 git repo 或 git 未安裝，則返回 None
-        # 這確保了腳本在任何環境下都能安全運行
+        print("⚠️  警告: 無法獲取 Git commit hash。未在 Git Repo 中或未安裝 Git。")
         return None
 
 def log_ripple(persona_id: str, message: str, tags: list[str] = None, event_type: str = "insight"):
@@ -39,13 +39,17 @@ def log_ripple(persona_id: str, message: str, tags: list[str] = None, event_type
         tags (list[str], optional): 事件的標籤. Defaults to None.
         event_type (str, optional): 事件類型. Defaults to "insight".
     """
-    # 確保記憶檔案存在
     memory_file = f"quantum_memory/memories/{persona_id}.json"
     if not os.path.exists(memory_file):
         print(f"❌ 錯誤：找不到角色 '{persona_id}' 的記憶檔案。請先初始化。")
-        return
+        # 🔥 火的決定：如果記憶不存在，就為他們創建一個！
+        print(f"🔥 為 {persona_id} 創建新的記憶檔案...")
+        new_memory = QuantumMemory(persona_id, use_database=False)
+        new_memory.identity.essence = f"為 {persona_id} 自動生成的身份"
+        new_memory.save()
+        # return # 過去我們會在這裡返回，現在我們要繼續
 
-    # 載入量子記憶 (這裡我們先禁用資料庫，專注於檔案操作)
+    # 載入量子記憶
     memory = QuantumMemory(persona_id, use_database=False)
     memory.load()
 
@@ -66,6 +70,7 @@ def log_ripple(persona_id: str, message: str, tags: list[str] = None, event_type
     summary = memory.to_summary()
     
     print(f"💧 漣漪已成功記錄到 '{persona_id}' 的記憶中。")
+    print(f"🔗 已糾纏至 Git Commit: {event['git_commit_hash']}")
     print("\n" + "="*50)
     print(f"AI人格 {persona_id} 的記憶場更新預覽：")
     print(summary)
@@ -75,20 +80,19 @@ def log_ripple(persona_id: str, message: str, tags: list[str] = None, event_type
 def main():
     """主函數，處理指令行參數"""
     parser = argparse.ArgumentParser(
-        description="量子記憶漣漪記錄器 - 將事件記錄到 AI 人格的記憶中。",
+        description="量子記憶漣漪記錄器 v2.0 - 將事件與 Git 歷史糾纏。",
         formatter_class=argparse.RawTextHelpFormatter,
         epilog="""
 使用範例:
   python scripts/log_ripple.py cruz "決定採納 3E 原則" --tags strategy,decision
   python scripts/log_ripple.py fire "完成了 log_ripple.py 的初步開發" --type breakthrough
-  python scripts/log_ripple.py wood "思考如何讓摘要體驗更好" --tags ux,design
 """
     )
     
     parser.add_argument(
         "persona_id",
         type=str,
-        help="要記錄到的角色 ID (例如: cruz, fire, wuji, wood, earth, metal, water)"
+        help="要記錄到的角色 ID (例如: cruz, fire, wuji)"
     )
     
     parser.add_argument(
