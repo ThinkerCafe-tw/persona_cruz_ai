@@ -403,11 +403,33 @@ class QuantumMemory:
 主要記憶晶體:
 """
         
-        for crystal in self.get_top_crystals(3):
-            dominant = crystal.get_dominant_possibility()
-            if dominant:
-                summary += f"\n💎 {crystal.concept}"
-                summary += f"\n   → {dominant.description} ({dominant.probability:.1%})"
-                summary += f"\n   熵值: {crystal.calculate_entropy():.2f}"
+        if not self.crystals:
+            summary += "\n(尚無主要記憶晶體)"
+        else:
+            for crystal in self.get_top_crystals(3):
+                dominant = crystal.get_dominant_possibility()
+                if dominant:
+                    summary += f"\n💎 {crystal.concept}"
+                    summary += f"\n   → {dominant.description} ({dominant.probability:.1%})"
+                    summary += f"\n   熵值: {crystal.calculate_entropy():.2f}"
+
+        summary += "\n\n最新漣漪:"
+        if not self.ripples:
+            summary += "\n(尚無漣漪)"
+        else:
+            # 顯示最近的 3 個漣漪
+            for ripple in list(self.ripples)[-3:]:
+                try:
+                    ripple_time = datetime.fromisoformat(ripple['timestamp']).strftime('%Y-%m-%d %H:%M:%S')
+                except (ValueError, TypeError):
+                    ripple_time = ripple.get('timestamp', 'N/A')
+                    
+                event_type = ripple.get('event', {}).get('type', 'N/A').upper()
+                content = ripple.get('event', {}).get('content', '...')
+                tags = ", ".join(ripple.get('event', {}).get('tags', []))
+                
+                summary += f"\n[{ripple_time}][{event_type}] {content}"
+                if tags:
+                    summary += f"  (#tags: {tags})"
         
         return summary

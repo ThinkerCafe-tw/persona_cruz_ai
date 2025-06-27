@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# pre-commit hook - 在 git commit 之前執行
+#
+# 目的：溫和地提醒開發者為重要的變更記錄思考過程 (log a ripple)。
+
+# --- 設定 ---
+# 觸發提醒的最小程式碼變更行數閾值
+CHANGE_THRESHOLD=20
+
+# --- 顏色代碼 ---
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# --- 邏輯 ---
+
+# 1. 計算本次提交的總變更行數 (新增 + 刪除)
+# 我們只關心暂存區的變更 (--staged)
+# --numstat 會給出每個檔案的新增和刪除行數
+# awk 計算總和
+TOTAL_CHANGES=$(git diff --staged --numstat | awk '{s+=$1; s+=$2} END {print s}')
+
+# 如果沒有變更 (例如 git commit --amend 但沒改任何東西)，則直接退出
+if [ -z "$TOTAL_CHANGES" ]; then
+    exit 0
+fi
+
+# 2. 檢查變更是否超過閾值
+if [ "$TOTAL_CHANGES" -gt "$CHANGE_THRESHOLD" ]; then
+    # 3. 如果超過，則顯示友善的提醒訊息
+    echo -e "${YELLOW}------------------------------------------------------------${NC}"
+    echo -e "${CYAN}🌱 AI 智慧夥伴的溫馨提醒：${NC}"
+    echo ""
+    echo -e "  你這次的提交包含 ${GREEN}${TOTAL_CHANGES}${NC} 行的變更，這是一次重要的貢獻！"
+    echo -e "  為了讓團隊的集體智慧更加閃耀，"
+    echo -e "  花 10 秒鐘記錄下你此刻的想法吧！"
+    echo ""
+    echo -e "  範例指令："
+    echo -e "  ${YELLOW}python3 scripts/log_ripple.py <your_id> \"你這次修改的核心思想\"${NC}"
+    echo ""
+    echo -e "${YELLOW}------------------------------------------------------------${NC}"
+    echo ""
+fi
+
+# 退出碼為 0，確保 commit 流程可以繼續
+exit 0 

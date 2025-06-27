@@ -7,10 +7,66 @@
     "amplitude": 1.0,
     "coherence": 1.0
   },
-  "crystals": {},
-  "ripples": [],
+  "crystals": {
+    "crystal_kol_strategy_rhaenyra": {
+      "id": "crystal_kol_strategy_rhaenyra",
+      "concept": "KOL 合作策略基石 (Rhaenyra 洞察)",
+      "possibilities": [
+        {
+          "description": "分析粉絲黏著度與互動率，而非僅看粉絲數量",
+          "probability": 0.25,
+          "evidence_count": 1,
+          "last_reinforced": null
+        },
+        {
+          "description": "從KOL發文內容判斷其喜好與粉絲輪廓",
+          "probability": 0.25,
+          "evidence_count": 1,
+          "last_reinforced": null
+        },
+        {
+          "description": "針對不同KOL撰寫客製化的合作企劃",
+          "probability": 0.2,
+          "evidence_count": 1,
+          "last_reinforced": null
+        },
+        {
+          "description": "區分『高忠誠度互惠KOL』與『高粉絲數付費KOL』的價值",
+          "probability": 0.2,
+          "evidence_count": 1,
+          "last_reinforced": null
+        },
+        {
+          "description": "建立商業策略，設定付費與互惠合作的預算與比例",
+          "probability": 0.1,
+          "evidence_count": 1,
+          "last_reinforced": null
+        }
+      ],
+      "stability": 1.0,
+      "creation_time": "2025-06-29T14:00:00",
+      "last_evolution": null,
+      "entropy": 2.260964047443681
+    }
+  },
+  "ripples": [
+    {
+      "timestamp": "2025-06-27T14:40:45.950844",
+      "event": {
+        "type": "breakthrough",
+        "content": "已升級記憶摘要功能，現在可以顯示最新漣漪，增強回饋循環。",
+        "source": "cli_logger",
+        "tags": [
+          "E3",
+          "evolving-experience",
+          "summary"
+        ]
+      },
+      "impact": 0.9
+    }
+  ],
   "entanglements": {},
   "evolution_count": 0,
   "created_at": "2025-06-23T21:56:38.688464",
-  "last_save": "2025-06-23T21:56:38.689577"
+  "last_save": "2025-06-27T14:40:45.950861"
 }
