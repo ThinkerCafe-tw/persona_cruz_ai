@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏠 AI 工程師設計的房間（災難預覽）</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .room-container {
+            width: 1200px;
+            height: 800px;
+            margin: 0 auto;
+            position: relative;
+            border: 3px solid #0f0;
+            background: #000;
+            box-shadow: 0 0 20px #0f0;
+        }
+        .title {
+            text-align: center;
+            font-size: 24px;
+            margin: 20px 0;
+            text-shadow: 0 0 10px #0f0;
+        }
+        .floor {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100px;
+            background: repeating-linear-gradient(
+                90deg,
+                #222,
+                #222 50px,
+                #333 50px,
+                #333 100px
+            );
+            border-top: 2px solid #0f0;
+        }
+        .wall {
+            position: absolute;
+            background: #111;
+            border: 1px solid #0f0;
+        }
+        .wall-back {
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 300px;
+            background: linear-gradient(180deg, #222 0%, #111 100%);
+        }
+        .furniture {
+            position: absolute;
+            border: 2px solid #0f0;
+            background: #001100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            text-align: center;
+            box-shadow: 0 0 10px #0f0;
+        }
+        .bed {
+            bottom: 100px;
+            right: 50px;
+            width: 200px;
+            height: 250px;
+            background: #002200;
+        }
+        .desk {
+            bottom: 100px;
+            left: 50px;
+            width: 300px;
+            height: 150px;
+            background: #001122;
+        }
+        .monitor {
+            position: absolute;
+            bottom: 150px;
+            left: 100px;
+            width: 200px;
+            height: 120px;
+            background: #000;
+            border: 3px solid #0f0;
+            box-shadow: 0 0 20px #0f0;
+        }
+        .server-rack {
+            bottom: 100px;
+            left: 400px;
+            width: 150px;
+            height: 400px;
+            background: repeating-linear-gradient(
+                0deg,
+                #111,
+                #111 20px,
+                #222 20px,
+                #222 40px
+            );
+        }
+        .cable {
+            position: absolute;
+            background: #0f0;
+            height: 2px;
+            transform-origin: left center;
+        }
+        .sticky-note {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: #ff0;
+            color: #000;
+            padding: 5px;
+            font-size: 10px;
+            transform: rotate(-5deg);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+        .plant {
+            position: absolute;
+            bottom: 100px;
+            right: 300px;
+            width: 60px;
+            height: 100px;
+            background: #001100;
+            border: 2px solid #0f0;
+        }
+        .plant::before {
+            content: "假植物\\A(會發光)";
+            white-space: pre;
+            position: absolute;
+            top: -30px;
+            left: -10px;
+            color: #0f0;
+            font-size: 10px;
+        }
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #0f0;
+            padding: 15px;
+            font-size: 12px;
+        }
+        .warning {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #f00;
+            text-shadow: 0 0 5px #f00;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        .rgb-strip {
+            position: absolute;
+            height: 5px;
+            background: linear-gradient(90deg, 
+                #f00 0%, #ff0 17%, #0f0 33%, 
+                #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+            animation: rgb-flow 3s linear infinite;
+        }
+        @keyframes rgb-flow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        .coffee-cups {
+            position: absolute;
+            bottom: 250px;
+            left: 150px;
+            color: #fff;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">🤖 AI 工程師の房間設計災難 v1.0</h1>
+    
+    <div class="room-container">
+        <!-- 牆壁 -->
+        <div class="wall wall-back">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px; opacity: 0.1;">
+                while(true) { code(); }
+            </div>
+        </div>
+        
+        <!-- 地板 -->
+        <div class="floor"></div>
+        
+        <!-- 床（其實是充電站） -->
+        <div class="furniture bed">
+            睡眠優化艙<br>
+            v2.0<br>
+            <span style="font-size: 10px;">內建咖啡因釋放系統</span>
+        </div>
+        
+        <!-- 桌子 -->
+        <div class="furniture desk">
+            量子工作站<br>
+            <span style="font-size: 10px;">支援 32 個螢幕</span>
+        </div>
+        
+        <!-- 螢幕 -->
+        <div class="monitor">
+            <div style="margin-top: 40px; color: #0f0;">
+                > 記憶體使用: 99.9%<br>
+                > CPU 溫度: 過熱<br>
+                > 咖啡庫存: 不足
+            </div>
+        </div>
+        
+        <!-- 伺服器機架（當然要有） -->
+        <div class="furniture server-rack">
+            個人<br>資料中心<br><br>
+            <span style="font-size: 10px;">24/7 風扇噪音</span>
+        </div>
+        
+        <!-- 到處都是線 -->
+        <div class="cable" style="bottom: 250px; left: 250px; width: 150px; transform: rotate(-20deg);"></div>
+        <div class="cable" style="bottom: 200px; left: 350px; width: 200px; transform: rotate(15deg);"></div>
+        <div class="cable" style="bottom: 150px; left: 100px; width: 300px; transform: rotate(-5deg);"></div>
+        
+        <!-- 便利貼（重要！） -->
+        <div class="sticky-note" style="top: 350px; left: 100px;">
+            TODO:<br>
+            - 修 bug<br>
+            - 睡覺<br>
+            - 吃飯
+        </div>
+        <div class="sticky-note" style="top: 400px; left: 200px; transform: rotate(10deg); background: #0ff;">
+            密碼:<br>
+            ******<br>
+            (已加密)
+        </div>
+        
+        <!-- 假植物 -->
+        <div class="plant"></div>
+        
+        <!-- RGB 燈條（必須的） -->
+        <div class="rgb-strip" style="top: 0; left: 0; right: 0;"></div>
+        <div class="rgb-strip" style="bottom: 100px; left: 0; right: 0;"></div>
+        
+        <!-- 咖啡杯們 -->
+        <div class="coffee-cups">☕☕☕☕☕</div>
+        
+        <!-- 圖例 -->
+        <div class="legend">
+            <strong>房間功能說明：</strong><br>
+            ✓ 光源：全部來自螢幕<br>
+            ✓ 裝飾：程式碼壁紙<br>
+            ✓ 通風：靠伺服器風扇<br>
+            ✓ 氛圍：賽博龐克監獄<br>
+            ✓ 舒適度：404 Not Found
+        </div>
+        
+        <!-- 警告 -->
+        <div class="warning">
+            ⚠️ 警告：此設計可能導致社交生活 segmentation fault
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px; color: #666;">
+        <p>設計理念：「誰需要陽光？我有 RGB！」</p>
+        <p>預算分配：90% 電腦設備 | 5% 床 | 5% 能量飲料</p>
+        <p>😅 現在你知道為什麼不該讓 AI 工程師設計房間了吧？</p>
+    </div>
+</body>
+</html>

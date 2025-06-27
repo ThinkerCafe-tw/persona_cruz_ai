@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔮 LibreChat + CRUZ 量子記憶整合測試</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .status-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .status-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .chat-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            height: 500px;
+        }
+        .chat-panel {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user-msg {
+            background: rgba(100, 149, 237, 0.8);
+            margin-left: auto;
+            text-align: right;
+        }
+        .ai-msg {
+            background: rgba(50, 205, 50, 0.8);
+            margin-right: auto;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .test-controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .test-btn {
+            background: #9C27B0;
+            margin: 5px;
+            padding: 15px 30px;
+            font-size: 16px;
+        }
+        .memory-indicator {
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .loading {
+            color: #ffd700;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 LibreChat + CRUZ 量子記憶整合測試</h1>
+        
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-title">🎯 CRUZ 量子代理狀態</div>
+                <div id="cruzStatus">📡 檢查中...</div>
+            </div>
+            <div class="status-card">
+                <div class="status-title">🧠 量子記憶系統狀態</div>
+                <div id="memoryStatus">📡 檢查中...</div>
+            </div>
+        </div>
+
+        <div class="memory-indicator">
+            <strong>🔮 量子記憶狀態：</strong> <span id="quantumMemoryStatus">初始化中...</span>
+        </div>
+
+        <div class="test-controls">
+            <button class="test-btn" onclick="runMemoryTest()">🧠 記憶持久性測試</button>
+            <button class="test-btn" onclick="runPersonaTest()">👥 人格一致性測試</button>
+            <button class="test-btn" onclick="runLibreChatSimulation()">💬 LibreChat 模擬測試</button>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-panel">
+                <div class="chat-header">🎯 CRUZ (量子增強)</div>
+                <div class="messages" id="cruzMessages"></div>
+                <div class="input-row">
+                    <input type="text" id="cruzInput" placeholder="與 CRUZ 對話..." onkeypress="if(event.key==='Enter')sendToCruz()">
+                    <button onclick="sendToCruz()">發送</button>
+                </div>
+            </div>
+            
+            <div class="chat-panel">
+                <div class="chat-header">🌸 Serena (溫柔支持)</div>
+                <div class="messages" id="serenaMessages"></div>
+                <div class="input-row">
+                    <input type="text" id="serenaInput" placeholder="與 Serena 對話..." onkeypress="if(event.key==='Enter')sendToSerena()">
+                    <button onclick="sendToSerena()">發送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8085';
+        
+        // 狀態檢查
+        async function checkStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                document.getElementById('cruzStatus').innerHTML = `
+                    ✅ 運行中<br>
+                    系統: ${data.cruz_system}<br>
+                    情緒: ${data.cruz_emotion}
+                `;
+                
+                document.getElementById('memoryStatus').innerHTML = `
+                    ${data.quantum_memory === 'enabled' ? '✅' : '❌'} ${data.quantum_memory}<br>
+                    狀態: ${data.quantum_status !== 'error' ? '正常' : '錯誤'}
+                `;
+                
+                document.getElementById('quantumMemoryStatus').textContent = 
+                    data.quantum_memory === 'enabled' ? '🔮 量子記憶已啟用' : '⚠️ 量子記憶未啟用';
+                    
+            } catch (error) {
+                document.getElementById('cruzStatus').innerHTML = '❌ 連接失敗';
+                document.getElementById('memoryStatus').innerHTML = '❌ 無法檢查';
+                document.getElementById('quantumMemoryStatus').textContent = '❌ 連接失敗';
+            }
+        }
+
+        // 發送訊息到 CRUZ
+        async function sendToCruz() {
+            const input = document.getElementById('cruzInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage('cruzMessages', message, 'user');
+            input.value = '';
+            
+            addMessage('cruzMessages', '🤔 思考中...', 'ai', true);
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'cruz-decisive',
+                        messages: [{ role: 'user', content: message }],
+                        user: 'librechat_test_user'
+                    })
+                });
+
+                const data = await response.json();
+                removeLoadingMessage('cruzMessages');
+                
+                if (data.choices && data.choices[0]) {
+                    const aiResponse = data.choices[0].message.content;
+                    const hasMemory = data.quantum_memory;
+                    addMessage('cruzMessages', `${aiResponse}${hasMemory ? ' 🧠' : ''}`, 'ai');
+                }
+            } catch (error) {
+                removeLoadingMessage('cruzMessages');
+                addMessage('cruzMessages', '❌ 連接錯誤', 'ai');
+            }
+        }
+
+        // 發送訊息到 Serena
+        async function sendToSerena() {
+            const input = document.getElementById('serenaInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage('serenaMessages', message, 'user');
+            input.value = '';
+            
+            addMessage('serenaMessages', '🌸 思考中...', 'ai', true);
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'serena-supportive',
+                        messages: [{ role: 'user', content: message }],
+                        user: 'librechat_test_user'
+                    })
+                });
+
+                const data = await response.json();
+                removeLoadingMessage('serenaMessages');
+                
+                if (data.choices && data.choices[0]) {
+                    const aiResponse = data.choices[0].message.content;
+                    const hasMemory = data.quantum_memory;
+                    addMessage('serenaMessages', `${aiResponse}${hasMemory ? ' 🧠' : ''}`, 'ai');
+                }
+            } catch (error) {
+                removeLoadingMessage('serenaMessages');
+                addMessage('serenaMessages', '❌ 連接錯誤', 'ai');
+            }
+        }
+
+        // 工具函數
+        function addMessage(containerId, text, sender, isLoading = false) {
+            const container = document.getElementById(containerId);
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender === 'user' ? 'user-msg' : 'ai-msg'}${isLoading ? ' loading' : ''}`;
+            messageDiv.textContent = text;
+            if (isLoading) messageDiv.id = `loading-${containerId}`;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeLoadingMessage(containerId) {
+            const loading = document.getElementById(`loading-${containerId}`);
+            if (loading) loading.remove();
+        }
+
+        // 測試函數
+        async function runMemoryTest() {
+            alert('🧠 記憶測試：請先問 CRUZ 一個問題，然後再次問同樣的問題，觀察回應是否不同');
+        }
+
+        async function runPersonaTest() {
+            // 自動測試兩個人格的差異
+            setTimeout(() => {
+                document.getElementById('cruzInput').value = '我需要學習新技能，你有什麼建議？';
+                sendToCruz();
+            }, 500);
+            
+            setTimeout(() => {
+                document.getElementById('serenaInput').value = '我需要學習新技能，你有什麼建議？';
+                sendToSerena();
+            }, 1000);
+        }
+
+        async function runLibreChatSimulation() {
+            // 模擬 LibreChat 的多輪對話
+            const testQuestions = [
+                "你好，我是新用戶",
+                "你記得我剛才說了什麼嗎？",
+                "我想學習程式設計"
+            ];
+            
+            for (let i = 0; i < testQuestions.length; i++) {
+                setTimeout(() => {
+                    document.getElementById('cruzInput').value = testQuestions[i];
+                    sendToCruz();
+                }, i * 2000);
+            }
+        }
+
+        // 初始化
+        checkStatus();
+        setInterval(checkStatus, 30000); // 每30秒檢查一次狀態
+        
+        // 歡迎訊息
+        addMessage('cruzMessages', '🎯 CRUZ 已就緒！我是你的行動導向 AI 助手！', 'ai');
+        addMessage('serenaMessages', '🌸 Serena 在這裡陪伴你。有什麼我可以幫助你的嗎？', 'ai');
+    </script>
+</body>
+</html>

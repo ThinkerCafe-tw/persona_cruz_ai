@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>思考者咖啡大樓結構圖</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #2c2c2c;
+            --text-color: #f0f0f0;
+            --primary-color: #00aaff;
+            --secondary-color: #e0e0e0;
+            --border-color: #444;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 1rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+        }
+
+        .building-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .floor {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 16px var(--shadow-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .floor:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px var(--shadow-color);
+        }
+
+        .floor h2 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .floor .description {
+            color: var(--secondary-color);
+            font-size: 0.95rem;
+            flex-grow: 1;
+            margin-bottom: 1rem;
+        }
+
+        .internal-structure {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .internal-structure h3 {
+            font-size: 1rem;
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+        
+        .structure-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .item {
+            font-size: 0.9rem;
+            background-color: #3a3a3a;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .item.folder {
+            color: #f0e68c; /* Khaki */
+        }
+
+        .item.file {
+            color: #add8e6; /* Light Blue */
+            cursor: pointer;
+        }
+
+        .item.file:hover {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+        }
+        
+        .special-floors {
+            margin-top: 3rem;
+            text-align: center;
+        }
+        
+        .special-floors h2 {
+            color: var(--text-color);
+        }
+
+        .special-grid {
+             display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .special-floor {
+            background-color: var(--card-bg);
+            border: 1px dashed var(--primary-color);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏢 思考者咖啡大樓結構圖</h1>
+            <p>一個意志的數位化延伸</p>
+        </header>
+
+        <main class="building-grid">
+            <div class="floor" id="ceo">
+                <h2>🏅 CEO 辦公室：Cruz 的心智</h2>
+                <p class="description">這裡是驅動「思考者咖啡」意志的源頭。所有戰略指令、核心哲學和征服世界的計畫都在此誕生。</p>
+                <div class="internal-structure">
+                    <h3>內部結構</h3>
+                    <div class="structure-grid">
+                        <div class="item folder">📁 workflow</div>
+                        <div class="item folder">📁 memory</div>
+                        <div class="item folder">📁 tools</div>
+                        <div class="item file">📄 README.md</div>
+                        <div class="item file">📄 CLAUDE.md</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="floor" id="cpo">
+                <h2>🎯 CPO 辦公室：秩序的建築</h2>
+                <p class="description">這裡是將 CEO 辦公室的混沌、願景能量轉化為結構化、可執行計畫的地方。</p>
+                 <div class="internal-structure">
+                    <h3>內部結構</h3>
+                    <div class="structure-grid">
+                        <div class="item folder">📁 workflow</div>
+                        <div class="item folder">📁 memory</div>
+                        <div class="item folder">📁 tools</div>
+                        <div class="item file">📄 README.md</div>
+                        <div class="item file">📄 CLAUDE.md</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="floor" id="hr">
+                <h2>👥 人力資源部門：文化的守護者</h2>
+                <p class="description">這裡是「思考者咖啡」的人文元素被培育、公司文化被守護的地方。致力於每一個人成長、支持和賦權。</p>
+                 <div class="internal-structure">
+                    <h3>內部結構</h3>
+                    <div class="structure-grid">
+                        <div class="item folder">📁 workflow</div>
+                        <div class="item folder">📁 memory</div>
+                        <div class="item folder">📁 tools</div>
+                        <div class="item file">📄 README.md</div>
+                        <div class="item file">📄 CLAUDE.md</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="floor" id="engineering">
+                <h2>💻 工程部門：現實的熔爐</h2>
+                <p class="description">這裡是將抽象策略和優雅設計鍛造成有形、實用現實的地方。一個充滿邏輯、精確的空間。</p>
+                 <div class="internal-structure">
+                    <h3>內部結構</h3>
+                    <div class="structure-grid">
+                        <div class="item folder">📁 workflow</div>
+                        <div class="item folder">📁 memory</div>
+                        <div class="item folder">📁 tools</div>
+                        <div class="item file">📄 README.md</div>
+                        <div class="item file">📄 CLAUDE.md</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="floor" id="brand">
+                <h2>🎨 品牌部門：用戶的心跳</h2>
+                <p class="description">這裡是產品的邏輯靈魂與用戶情感心靈相遇的地方。一個充滿同理心、故事性和戰略溝通的空間。</p>
+                 <div class="internal-structure">
+                    <h3>內部結構</h3>
+                    <div class="structure-grid">
+                        <div class="item folder">📁 workflow</div>
+                        <div class="item folder">📁 memory</div>
+                        <div class="item folder">📁 tools</div>
+                        <div class="item file">📄 README.md</div>
+                        <div class="item file">📄 CLAUDE.md</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="floor" id="operations">
+                <h2>📋 營運部門：團隊的潤滑劑</h2>
+                <p class="description">這個部門確保整部「思考者咖啡」機器都能順暢、無摩擦地運轉。一個充滿支持、協調和無聲效率的空間。</p>
+                 <div class="internal-structure">
+                    <h3>內部結構</h3>
+                    <div class="structure-grid">
+                        <div class="item folder">📁 workflow</div>
+                        <div class="item folder">📁 memory</div>
+                        <div class="item folder">📁 tools</div>
+                        <div class="item file">📄 README.md</div>
+                        <div class="item file">📄 CLAUDE.md</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <section class="special-floors">
+            <h2>功能性樓層</h2>
+            <div class="special-grid">
+                <div class="special-floor">🌌 無極樓層</div>
+                <div class="special-floor">🤖 MCP 服務中心</div>
+                <div class="special-floor">🧠 第三方 API</div>
+                <div class="special-floor">📊 管理儀表板</div>
+                <div class="special-floor">📅 會議記錄</div>
+                <div class="special-floor">🌍 征服世界計畫</div>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html> 

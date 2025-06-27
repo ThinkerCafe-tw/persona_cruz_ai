@@ -181,7 +181,7 @@ class QuantumMemory:
         logger.info(f"Added new crystal: {concept} for {self.persona_id}")
         return crystal
     
-    def find_resonating_crystals(self, keywords: List[str], threshold: float = 0.3) -> List[MemoryCrystal]:
+    def find_resonating_crystals(self, keywords: List[str], threshold: float = 0.2) -> List[MemoryCrystal]:
         """找出與關鍵詞共振的晶體"""
         resonating = []
         

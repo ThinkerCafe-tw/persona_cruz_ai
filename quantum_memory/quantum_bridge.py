@@ -100,6 +100,25 @@ class QuantumMemoryBridge:
         # 觸發相關角色的量子演化
         for persona_id in affected_personas:
             self.trigger_evolution(persona_id, quantum_event)
+            
+        # 重要：確保對話被儲存為記憶晶體
+        if source == "conversation" and data.get("message"):
+            # 為主要角色創建記憶晶體
+            main_persona = data.get("role", "cruz").lower()
+            if main_persona in self.quantum_memories:
+                memory = self.quantum_memories[main_persona]
+                
+                # 創建對話記憶晶體
+                crystal_concept = f"對話記憶: {data.get('user_id', 'unknown')} - {data.get('message', '')[:50]}"
+                crystal = memory.create_crystal(crystal_concept)
+                
+                # 添加對話細節
+                crystal.add_possibility(f"用戶說: {data.get('message', '')}", 0.9)
+                crystal.add_possibility(f"我回應: {data.get('response', '')}", 0.9)
+                
+                # 保存記憶
+                memory.save()
+                logger.info(f"💎 儲存對話記憶晶體: {crystal_concept}")
     
     def trigger_evolution(self, persona_id: str, event: dict):
         """觸發特定角色的量子演化"""
@@ -146,6 +165,72 @@ class QuantumMemoryBridge:
         
         return min(resonance, 1.0)  # 限制在0-1之間
     
+    def search_memories(self, query: str, limit: int = 5, persona: str = None) -> List[Any]:
+        """搜尋相關記憶"""
+        results = []
+        
+        logger.info(f"🔍 開始搜尋記憶：query='{query}', persona='{persona}'")
+        
+        # 如果指定了 persona，只搜尋該角色的記憶
+        if persona and persona.upper() in ["CRUZ", "SERENA"]:
+            persona_key = "cruz" if persona.upper() == "CRUZ" else "cruz"  # 暫時都用 cruz
+            logger.info(f"🔍 搜尋特定角色記憶：{persona_key}")
+            
+            if persona_key in self.quantum_memories:
+                memory = self.quantum_memories[persona_key]
+                logger.info(f"🔍 記憶中現有 {len(memory.crystals)} 個晶體")
+                
+                keywords = self._extract_keywords(query)
+                logger.info(f"🔍 提取到關鍵詞：{keywords}")
+                
+                crystals = memory.find_resonating_crystals(keywords)
+                logger.info(f"🔍 找到 {len(crystals)} 個共振晶體")
+                
+                for crystal_tuple in crystals[:limit]:
+                    # crystals 是 (crystal, resonance) 的元組
+                    crystal = crystal_tuple[0] if isinstance(crystal_tuple, tuple) else crystal_tuple
+                    
+                    # 創建一個簡單的記憶對象，使用 MemoryCrystal 的實際屬性
+                    content = f"概念: {crystal.concept}"
+                    if hasattr(crystal, 'possibilities') and crystal.possibilities:
+                        content += f"\n相關想法: {', '.join([p.description for p in crystal.possibilities[:3]])}"
+                    
+                    memory_obj = type('Memory', (), {
+                        'content': content,
+                        'memory_id': getattr(crystal, 'id', str(hash(crystal.concept))),
+                        'timestamp': getattr(crystal, 'timestamp', datetime.now())
+                    })()
+                    results.append(memory_obj)
+        else:
+            # 搜尋所有角色的記憶
+            for persona_id, memory in self.quantum_memories.items():
+                keywords = self._extract_keywords(query)
+                crystals = memory.find_resonating_crystals(keywords)
+                
+                for crystal_tuple in crystals:
+                    # crystals 是 (crystal, resonance) 的元組
+                    crystal = crystal_tuple[0] if isinstance(crystal_tuple, tuple) else crystal_tuple
+                    
+                    # 創建一個簡單的記憶對象，使用 MemoryCrystal 的實際屬性
+                    content = f"概念: {crystal.concept}"
+                    if hasattr(crystal, 'possibilities') and crystal.possibilities:
+                        content += f"\n相關想法: {', '.join([p.description for p in crystal.possibilities[:3]])}"
+                    
+                    memory_obj = type('Memory', (), {
+                        'content': content,
+                        'memory_id': getattr(crystal, 'id', str(hash(crystal.concept))),
+                        'timestamp': getattr(crystal, 'timestamp', datetime.now())
+                    })()
+                    results.append(memory_obj)
+                    
+                    if len(results) >= limit:
+                        break
+                if len(results) >= limit:
+                    break
+        
+        logger.info(f"🔍 搜尋查詢 '{query}' 找到 {len(results)} 個記憶")
+        return results
+
     def _extract_keywords(self, text: str) -> List[str]:
         """從文本中提取關鍵詞"""
         # 簡單的關鍵詞提取
@@ -154,20 +239,27 @@ class QuantumMemoryBridge:
         # 預定義的重要概念
         concepts = [
             "創造", "平衡", "測試", "優化", "架構", "開發",
-            "決策", "智慧", "經驗", "學習", "成長", "演化"
+            "決策", "智慧", "經驗", "學習", "成長", "演化",
+            "名字", "叫", "我", "記得", "程式", "軟體", "工程師"
         ]
         
+        # 檢查是否包含預定義概念
         for concept in concepts:
             if concept in text:
                 important_words.append(concept)
         
-        # 提取較長的詞（可能更重要）
+        # 提取所有有意義的詞彙
         words = text.split()
         for word in words:
-            if len(word) > 3:  # 中文通常2個字以上
+            if len(word) > 1:  # 降低門檻，包含更多詞彙
                 important_words.append(word)
         
-        return list(set(important_words))[:10]  # 最多10個關鍵詞
+        # 也包含完整的查詢作為關鍵詞
+        important_words.append(text)
+        
+        keywords = list(set(important_words))[:10]  # 最多10個關鍵詞
+        logger.info(f"🔍 從 '{text}' 提取關鍵詞: {keywords}")
+        return keywords
     
     def _corpus_to_quantum(self, data: dict) -> dict:
         """將語料庫資料轉換為量子事件"""

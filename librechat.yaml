@@ -1,0 +1,36 @@
+# CRUZ AI LibreChat Configuration
+version: 1.2.1
+cache: true
+
+# Interface settings
+interface:
+  endpointsMenu: true
+  modelSelect: true
+  parameters: true
+
+# Custom CRUZ AI endpoints
+endpoints:
+  custom:
+    # CRUZ - Decisive Action AI
+    - name: "CRUZ"
+      apiKey: "dummy-key"
+      baseURL: "http://localhost:8082/v1"
+      models:
+        default: ["cruz-decisive"]
+        fetch: false
+      titleConvo: true
+      titleModel: "cruz-decisive"
+      modelDisplayLabel: "🎯 CRUZ"
+      dropParams: ["user"]
+      
+    # Serena - Supportive AI  
+    - name: "Serena"
+      apiKey: "dummy-key"
+      baseURL: "http://localhost:8082/v1"
+      models:
+        default: ["serena-supportive"]
+        fetch: false
+      titleConvo: true
+      titleModel: "serena-supportive"
+      modelDisplayLabel: "🌸 Serena"
+      dropParams: ["user"]

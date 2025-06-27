@@ -1,0 +1,29 @@
+{
+  "name": "mcp-cruz",
+  "version": "1.0.0",
+  "description": "CRUZ MCP Server - 增強對話理解與記憶",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-cruz": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "keywords": ["mcp", "cruz", "ai", "memory"],
+  "author": "CRUZ AI",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "pg": "^8.11.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.0",
+    "typescript": "^5.3.0",
+    "tsx": "^4.5.0"
+  }
+}

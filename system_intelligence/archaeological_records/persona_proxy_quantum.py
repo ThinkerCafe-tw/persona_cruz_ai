@@ -193,7 +193,7 @@ async def chat_completions(request: ChatCompletionRequest):
         
         # 量子記憶搜尋（如果可用）
         memory_context = ""
-        if QUANTUM_AVAILABLE:
+        if QUANTUM_AVAILABLE == True and quantum_integration:
             try:
                 # 搜尋相關記憶
                 memories = quantum_integration.bridge.search_memories(
@@ -202,14 +202,18 @@ async def chat_completions(request: ChatCompletionRequest):
                     persona="CRUZ"
                 )
                 
-                if memories:
-                    memory_context = "\n[量子記憶]:\n"
+                if memories and len(memories) > 0:
+                    memory_context = "\n[量子記憶回憶]:\n"
                     for mem in memories:
                         memory_context += f"- {mem.content[:100]}...\n"
-                    logger.info(f"找到 {len(memories)} 個相關記憶")
+                    logger.info(f"🧠 找到 {len(memories)} 個相關記憶")
+                else:
+                    logger.info("🧠 未找到相關記憶")
                     
             except Exception as e:
-                logger.warning(f"量子記憶搜尋失敗: {e}")
+                logger.warning(f"⚠️ 量子記憶搜尋失敗: {e}")
+        else:
+            logger.info(f"🧠 量子記憶狀態: {QUANTUM_AVAILABLE}")
         
         # 根據模型選擇人格
         if request.model == "cruz-decisive":
@@ -234,7 +238,7 @@ async def chat_completions(request: ChatCompletionRequest):
             response_text = cruz_engine.get_response(user_message)
         
         # 儲存到量子記憶（如果可用）
-        if QUANTUM_AVAILABLE:
+        if QUANTUM_AVAILABLE == True and quantum_integration:
             try:
                 quantum_integration.process_conversation(
                     user_id=request.user or "web_user",
@@ -243,9 +247,11 @@ async def chat_completions(request: ChatCompletionRequest):
                     current_role=request.model.split("-")[0],
                     emotion="determined"
                 )
-                logger.info("對話已同步到量子記憶")
+                logger.info("💾 對話已同步到量子記憶")
             except Exception as e:
-                logger.warning(f"量子記憶儲存失敗: {e}")
+                logger.warning(f"⚠️ 量子記憶儲存失敗: {e}")
+        else:
+            logger.info(f"💾 量子記憶狀態: {QUANTUM_AVAILABLE} - 跳過儲存")
         
         # 回傳 OpenAI 格式的回應
         return JSONResponse(content={

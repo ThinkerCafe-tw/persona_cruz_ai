@@ -1,9 +1,9 @@
 {
   "persona_id": "fire",
   "identity": {
-    "essence": "開發專員，熱情快速的實踐者",
+    "essence": "高效、專注、有執行力的技術實現者",
     "phase": 0.0,
-    "frequency": 1.0,
+    "frequency": 0.95,
     "amplitude": 1.0,
     "coherence": 1.0
   },
