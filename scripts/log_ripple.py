@@ -7,12 +7,27 @@
 import argparse
 import os
 import sys
+import subprocess
 from datetime import datetime
 
 # 確保可以從 scripts 目錄導入上層模組
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from quantum_memory.quantum_memory import QuantumMemory
+
+def get_current_git_commit() -> str | None:
+    """獲取當前的 git commit hash"""
+    try:
+        # 執行 git 指令來獲取 HEAD 的 commit hash
+        commit_hash = subprocess.check_output(
+            ['git', 'rev-parse', 'HEAD'], 
+            stderr=subprocess.STDOUT
+        ).strip().decode('utf-8')
+        return commit_hash
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # 如果不在 git repo 或 git 未安裝，則返回 None
+        # 這確保了腳本在任何環境下都能安全運行
+        return None
 
 def log_ripple(persona_id: str, message: str, tags: list[str] = None, event_type: str = "insight"):
     """
@@ -39,7 +54,8 @@ def log_ripple(persona_id: str, message: str, tags: list[str] = None, event_type
         "type": event_type,
         "content": message,
         "source": "cli_logger",
-        "tags": tags if tags else []
+        "tags": tags if tags else [],
+        "git_commit_hash": get_current_git_commit()  # 錨定到當前的 commit
     }
 
     # 添加漣漪並保存
